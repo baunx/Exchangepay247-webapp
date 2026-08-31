@@ -1,9 +1,9 @@
 window.CONFIG = {
   settings: {
-    feePercent: 1.00,
+    feePercent: 28.00,
     refreshMs: 60000,
-    adminTelegram: "@exchangepay247",
-    supportTelegram: "@exchangepay247"
+    adminTelegram: "@exchangepay2477",
+    supportTelegram: "@exchangepay2477"
   },
 
   crypto: {

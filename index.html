@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EXCHANGEPAY247 — Crypto Exchange</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div><div class="brand"><span class="brand-mark">◆</span> EXCHANGEPAY247</div><div class="muted">Crypto Exchange</div></div>
+  <div class="live" id="liveStatus">● UPDATING</div>
+</header>
+
+<main>
+<div class="steps">
+  <div class="step active" id="s1"><b>1</b><span>Exchange</span></div><div class="line"></div>
+  <div class="step" id="s2"><b>2</b><span>Payment</span></div><div class="line"></div>
+  <div class="step" id="s3"><b>3</b><span>Submit</span></div>
+</div>
+
+<section id="step1">
+  <section class="hero">
+    <div class="usdt">₮</div>
+    <h1>Start Your Exchange</h1>
+    <p>Fast • Simple • Worldwide</p>
+  </section>
+
+  <div class="card exchange-card">
+    <div class="field-label">You Send From</div>
+    <button class="select-box" id="sendPicker">
+      <span class="asset-icon" id="sendIcon">₮</span>
+      <span class="select-content"><b id="sendName">USDT</b><small id="sendSub">Tether USDT</small></span>
+      <span>⌄</span>
+    </button>
+
+    <div class="swap">⇅</div>
+
+    <div class="field-label">You Receive To</div>
+    <button class="select-box" id="receivePicker">
+      <span class="asset-icon" id="receiveIcon">🏦</span>
+      <span class="select-content"><b id="receiveName">Bank US</b><small id="receiveSub">USD • Available</small></span>
+      <span>⌄</span>
+    </button>
+
+    <div class="amount-label">Amount</div>
+    <div class="amount">
+      <input id="amount" type="number" min="0" step="0.01" value="100">
+      <span class="amount-unit" id="amountUnit">USDT</span>
+    </div>
+
+    <div class="receive-preview">
+      <span>You Receive</span>
+      <strong id="receive">—</strong>
+    </div>
+
+    <div class="rate"><span>Market Rate</span><strong id="marketRate">Waiting for live rate…</strong></div>
+    <div class="rate"><span>Your Rate</span><strong id="customerRate">Waiting for live rate…</strong></div>
+  </div>
+
+  <div class="picker hidden" id="picker">
+    <div class="picker-head"><b id="pickerTitle">Select</b><button id="closePicker">✕</button></div>
+    <div id="pickerList"></div>
+  </div>
+
+  <button class="primary" id="toPayment">CONTINUE EXCHANGE →</button>
+</section>
+
+<section id="step2" class="hidden">
+  <div class="page-title"><button class="back" id="back1">‹</button><div><h2>Payment Information</h2><p>Complete the transfer using the details below.</p></div></div>
+  <div class="order-badge" id="orderBadge"></div>
+  <div class="card"><div class="section-title" id="paymentTitle">Payment Details</div><div id="paymentInfo"></div><button class="copy" id="copyInfo">📋 COPY PAYMENT INFO</button></div>
+  <div class="card">
+    <div class="summary-row"><span>You Send</span><strong id="paySummary"></strong></div>
+    <div class="summary-row"><span>You Receive</span><strong id="receiveSummary"></strong></div>
+    <div class="summary-row"><span>Method</span><strong id="methodSummary"></strong></div>
+    <div class="summary-row"><span>Rate</span><strong id="rateSummary"></strong></div>
+  </div>
+  <div class="warning">⚠️ Send exactly the amount shown above. After payment, continue and submit your receiving information.</div>
+  <button class="primary" id="toSubmit">I'VE PAID →</button>
+</section>
+
+<section id="step3" class="hidden">
+  <div class="page-title"><button class="back" id="back2">‹</button><div><h2>Submit Order</h2><p>Enter your receiving information.</p></div></div>
+  <div class="card">
+    <div class="section-title">Order Information</div>
+    <div class="field"><label>Receiving Information</label><input id="destination" placeholder="Enter your receiving address / account"></div>
+    <div class="field"><label>Network</label><select id="network"></select></div>
+    <div class="field"><label>Telegram Username</label><input id="telegram" placeholder="@username"></div>
+    <div class="field"><label>Transaction ID <span>(optional)</span></label><input id="txid" placeholder="Enter transaction ID"></div>
+    <div class="field"><label>Note <span>(optional)</span></label><textarea id="note" rows="3" placeholder="Additional information"></textarea></div>
+  </div>
+  <div class="card telegram-box"><div class="tg-icon">✈️</div><div><b>Payment screenshot</b><p>After submitting your order, send the successful payment screenshot to our Telegram admin.</p></div></div>
+  <label class="check"><input type="checkbox" id="confirmCheck"><span>I confirm that my payment and receiving information are correct.</span></label>
+  <button class="primary" id="submitOrder">SUBMIT ORDER</button>
+  <div id="success" class="success hidden"><div class="success-icon">✓</div><h2>Order Submitted</h2><p id="successText"></p><button class="primary" id="sendTelegram">SEND SCREENSHOT TO ADMIN →</button><button class="copy" id="newOrder">NEW ORDER</button></div>
+</section>
+</main>
+<footer>EXCHANGEPAY247 • Crypto Exchange</footer>
+</div>
+<script src="config.js"></script><script src="app.js"></script>
+</body>
+</html>

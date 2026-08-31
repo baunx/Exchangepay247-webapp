@@ -41,7 +41,7 @@ const CONFIG = {
     "Zelle": {
       status: "available", type: "fiat", currency: "USD",
       title: "Zelle",
-      fields: [["Name","CHAU TRAN"],["Email","tniennien@gmail.com"]]
+      fields: [["Name","Thai Huynh"],["Emai/Phonel","978 908 8895"]]
     },
     "Venmo": {
       status: "available", type: "fiat", currency: "USD",

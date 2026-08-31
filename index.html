@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>EXCHANGEPAY247 — USDT Exchange</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+<header class="top">
+  <div>
+    <div class="brand">EXCHANGEPAY247</div>
+    <div class="muted">USDT Exchange</div>
+  </div>
+  <div class="live" id="liveStatus">● LIVE</div>
+</header>
+
+<main>
+  <div class="steps">
+    <div class="step active" id="s1"><b>1</b><span>Exchange</span></div>
+    <div class="line"></div>
+    <div class="step" id="s2"><b>2</b><span>Payment</span></div>
+    <div class="line"></div>
+    <div class="step" id="s3"><b>3</b><span>Submit</span></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <section id="step1">
+    <section class="hero">
+      <div class="usdt">₮</div>
+      <h1>USDT Exchange</h1>
+      <p>Fast • Simple • Two-Way</p>
+    </section>
+
+    <div class="switch">
+      <button class="mode active" data-mode="buy">BUY USDT</button>
+      <button class="mode" data-mode="sell">SELL USDT</button>
+    </div>
+
+    <div class="card">
+      <div class="label" id="sendLabel">You Pay</div>
+      <div class="amount">
+        <input id="amount" type="number" min="0" step="0.01" value="100">
+        <select id="sendAsset"></select>
+      </div>
+
+      <div class="label receive-label">You Receive</div>
+      <div class="amount receive">
+        <input id="receive" readonly>
+        <select id="receiveAsset"></select>
+      </div>
+
+      <div class="rate"><span>Market Rate</span><strong id="marketRate">—</strong></div>
+      <div class="rate"><span>Your Fee</span><strong id="fee">—</strong></div>
+      <div class="rate"><span>Your Rate</span><strong id="customerRate">—</strong></div>
+    </div>
+
+    <div class="card">
+      <div class="label">Payment / Payout Method</div>
+      <div class="methods" id="methodList"></div>
+    </div>
+
+    <button class="primary" id="toPayment">CONTINUE →</button>
+  </section>
+
+  <!-- STEP 2 -->
+  <section id="step2" class="hidden">
+    <div class="page-title">
+      <button class="back" id="back1">‹</button>
+      <div><h2>Payment Information</h2><p>Complete the transfer using the details below.</p></div>
+    </div>
+
+    <div class="order-badge" id="orderBadge"></div>
+
+    <div class="card">
+      <div class="section-title" id="paymentTitle">Payment Details</div>
+      <div id="paymentInfo"></div>
+      <button class="copy" id="copyInfo">📋 COPY PAYMENT INFO</button>
+    </div>
+
+    <div class="card">
+      <div class="summary-row"><span>You Pay</span><strong id="paySummary"></strong></div>
+      <div class="summary-row"><span>You Receive</span><strong id="receiveSummary"></strong></div>
+      <div class="summary-row"><span>Method</span><strong id="methodSummary"></strong></div>
+      <div class="summary-row"><span>Rate</span><strong id="rateSummary"></strong></div>
+    </div>
+
+    <div class="warning">⚠️ Send exactly the amount shown above. After payment, upload your proof on the next step.</div>
+    <button class="primary" id="toSubmit">I'VE PAID →</button>
+  </section>
+
+  <!-- STEP 3 -->
+  <section id="step3" class="hidden">
+    <div class="page-title">
+      <button class="back" id="back2">‹</button>
+      <div><h2>Submit Order</h2><p>Send your payment proof and receiving details.</p></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Payment Confirmation</div>
+      <div class="telegram-box">
+        <div class="tg-icon">✈️</div>
+        <div>
+          <b>Send your payment screenshot on Telegram</b>
+          <p>After submitting this order, send the successful payment screenshot to our admin together with your Order ID.</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Transaction ID <span>(optional)</span></label>
+        <input id="txid" placeholder="Enter transaction ID">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title" id="receiveTitle">Receiving Information</div>
+      <div class="field">
+        <label id="destinationLabel">USDT Wallet Address</label>
+        <input id="destination" placeholder="Enter your receiving address">
+      </div>
+      <div class="field">
+        <label id="networkLabel">Network</label>
+        <select id="network">
+          <option>TRC20</option>
+          <option>ERC20</option>
+          <option>BEP20</option>
+          <option>Solana</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Telegram Username</label>
+        <input id="telegram" placeholder="@username">
+      </div>
+      <div class="field">
+        <label>Note <span>(optional)</span></label>
+        <textarea id="note" rows="3" placeholder="Additional information"></textarea>
+      </div>
+    </div>
+
+    <label class="check"><input type="checkbox" id="confirmCheck"> I confirm that the payment information I submitted is correct.</label>
+    <button class="primary" id="submitOrder">SUBMIT ORDER</button>
+
+    <div id="success" class="success hidden">
+      <div class="success-icon">✓</div>
+      <h2>Order Submitted</h2>
+      <p id="successText"></p>
+      <button class="primary" id="sendTelegram">SEND SCREENSHOT TO ADMIN →</button>
+      <button class="copy" id="newOrder">NEW ORDER</button>
+    </div>
+  </section>
+</main>
+
+<footer>EXCHANGEPAY247 • USDT Exchange</footer>
+</div>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

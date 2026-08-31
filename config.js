@@ -32,8 +32,8 @@ const CONFIG = {
     "Zelle": {
       title: "Zelle",
       fields: [
-        ["Name", "YOUR ZELLE NAME"],
-        ["Email", "YOUR ZELLE EMAIL"]
+        ["Name", "Thai Hinh"],
+        ["Email/Phone", "978 908 8895"]
       ]
     },
     "Venmo": {

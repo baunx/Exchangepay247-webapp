@@ -8,7 +8,7 @@ const CONFIG = {
   settings: {
     adminTelegram: "exchangepay2477",
     supportTelegram: "exchangepay2477",
-    feePercent: 1.0,
+    feePercent: 28.0,
     refreshMs: 60000
   },
 

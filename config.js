@@ -5,7 +5,7 @@ const CONFIG = {
   adminTelegram: "exchangepay2477",
 
   // Your fee. Example: 1 = 1%, 1.5 = 1.5%
-  feePercent: 1.0,
+  feePercent: 25.0,
 
   // Live rate refresh interval
   refreshMs: 60000,

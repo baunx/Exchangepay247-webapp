@@ -256,14 +256,14 @@ function cryptoIcon(asset) {
 
   if (data.icon) {
 
-    return  
+    return `
       <img
         class="asset-logo"
         src="${escapeHTML(data.icon)}"
         alt="${escapeHTML(asset)}"
         onerror="this.style.display='none'"
       >
-     ;
+    `;
 
   }
 
@@ -279,14 +279,14 @@ function paymentIcon(method) {
 
   if (data.icon) {
 
-    return  
+    return `
       <img
         class="asset-logo"
         src="${escapeHTML(data.icon)}"
         alt="${escapeHTML(method)}"
         onerror="this.style.display='none'"
       >
-     ;
+    `;
 
   }
 
@@ -413,48 +413,27 @@ function updateDirectionButtons() {
 ========================================================= */
 
 function renderSend() {
-
-  const data =
-    sendData();
+  const data = sendData();
 
   if (sendType() === "crypto") {
-
-    $("sendIcon").innerHTML =
-      cryptoIcon(sendAsset);
-
-    $("sendName").textContent =
-      sendAsset;
-
+    $("sendIcon").innerHTML = cryptoIcon(sendAsset);
+    $("sendName").textContent = sendAsset;
+    $("sendSub").textContent = data.name || sendAsset;
+  } else {
+    $("sendIcon").innerHTML = paymentIcon(sendAsset);
+    $("sendName").textContent = sendAsset;
     $("sendSub").textContent =
-      data.name ||
-      sendAsset;
-
-  }
-
-  else {
-
-    $("sendIcon").innerHTML =
-      paymentIcon(sendAsset);
-
-    $("sendName").textContent =
-      sendAsset;
-
-    $("sendSub").textContent =
-       ${data.currency || "USD"} • ${
+      `${data.currency || "USD"} • ${
         data.status === "request"
           ? "By Request"
           : "Available"
-      } ;
-
+      }`;
   }
 
-
-  $("sendAmountToken")
-    .textContent =
-      sendType() === "crypto"
-        ?  ${fallbackCryptoIcon(sendAsset)} ${sendAsset} 
-        : data.currency || "USD";
-
+  $("sendAmountToken").textContent =
+    sendType() === "crypto"
+      ? `${fallbackCryptoIcon(sendAsset)} ${sendAsset}`
+      : data.currency || "USD";
 }
 
 
@@ -463,137 +442,77 @@ function renderSend() {
 ========================================================= */
 
 function renderReceive() {
-
-  const data =
-    receiveData();
-
+  const data = receiveData();
 
   if (receiveType() === "crypto") {
-
-    $("receiveIcon").innerHTML =
-      cryptoIcon(receiveAsset);
-
-    $("receiveName").textContent =
-      receiveAsset;
-
+    $("receiveIcon").innerHTML = cryptoIcon(receiveAsset);
+    $("receiveName").textContent = receiveAsset;
+    $("receiveSub").textContent = data.name || receiveAsset;
+    $("receiveAmountToken").textContent =
+      `${fallbackCryptoIcon(receiveAsset)} ${receiveAsset}`;
+  } else {
+    $("receiveIcon").innerHTML = paymentIcon(receiveAsset);
+    $("receiveName").textContent = receiveAsset;
     $("receiveSub").textContent =
-      data.name ||
-      receiveAsset;
-
-    $("receiveAmountToken")
-      .textContent =
-         ${fallbackCryptoIcon(receiveAsset)} ${receiveAsset} ;
-
-  }
-
-  else {
-
-    $("receiveIcon").innerHTML =
-      paymentIcon(receiveAsset);
-
-    $("receiveName").textContent =
-      receiveAsset;
-
-    $("receiveSub").textContent =
-       ${data.currency || "USD"} • ${
+      `${data.currency || "USD"} • ${
         data.status === "request"
           ? "By Request"
           : "Available"
-      } ;
-
-    $("receiveAmountToken")
-      .textContent =
-        data.currency ||
-        "USD";
-
+      }`;
+    $("receiveAmountToken").textContent =
+      data.currency || "USD";
   }
-
 }
 
 
 /* =========================================================
    NETWORK
-========================================================= */
+=========================================================
 
 function renderNetwork() {
-
-  const network =
-    $("network");
-
-  const networkField =
-    $("networkField");
-
-  const preview =
-    $("networkPreview");
-
+  const network = $("network");
+  const networkField = $("networkField");
+  const preview = $("networkPreview");
 
   if (receiveType() !== "crypto") {
-
-    networkField
-      .classList
-      .add("hidden");
-
-    preview
-      .classList
-      .add("hidden");
-
-    network.innerHTML =  
-      <option>
-        Not applicable
-      </option>
-     ;
-
+    networkField.classList.add("hidden");
+    preview.classList.add("hidden");
+    network.innerHTML = `
+      <option>Not applicable</option>
+    `;
     return;
-
   }
 
+  networkField.classList.remove("hidden");
 
-  networkField
-    .classList
-    .remove("hidden");
-
-
-  const data =
-    cryptos()[receiveAsset] || {};
-
+  const data = cryptos()[receiveAsset] || {};
   const networks =
     Array.isArray(data.networks)
       ? data.networks
       : [];
 
-
   if (!networks.length) {
-
-    network.innerHTML =  
-      <option>
-        Not applicable
-      </option>
-     ;
-
-  }
-
-  else {
-
+    network.innerHTML = `
+      <option>Not applicable</option>
+    `;
+  } else {
     network.innerHTML =
       networks
-        .map(item =>  
+        .map(item => `
           <option value="${escapeHTML(item)}">
             ${escapeHTML(item)}
           </option>
-         )
+        `)
         .join("");
-
   }
 
-
   updateNetworkPreview();
-
 }
 
 
 /* =========================================================
    NETWORK PREVIEW
-========================================================= */
+=========================================================
 
 function updateNetworkPreview() {
 
@@ -995,12 +914,12 @@ function update() {
 
     $("marketRate")
       .textContent =
-         1 ${crypto} ≈ ${fmt(market)} ${fiat} ;
+        `1 ${crypto} ≈ ${fmt(market)} ${fiat}`;
 
 
     $("customerRate")
       .textContent =
-         1 ${crypto} ≈ ${fmt(customer)} ${fiat} ;
+        `1 ${crypto} ≈ ${fmt(customer)} ${fiat}`;
 
   }
 
@@ -1074,150 +993,84 @@ function render() {
 ========================================================= */
 
 function openPicker(side) {
+  pickerSide = side;
 
-  pickerSide =
-    side;
+  $("pickerTitle").textContent =
+    side === "send"
+      ? "You Send From"
+      : "You Receive To";
 
-
-  $("pickerTitle")
-    .textContent =
-      side === "send"
-        ? "You Send From"
-        : "You Receive To";
-
-
-  $("pickerList")
-    .innerHTML = "";
-
+  $("pickerList").innerHTML = "";
 
   const type =
     side === "send"
       ? sendType()
       : receiveType();
 
-
   const source =
     type === "crypto"
       ? cryptos()
       : payments();
 
+  Object.entries(source).forEach(
+    ([id, data]) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "picker-item";
 
-  Object.entries(source)
-    .forEach(
-      ([id, data]) => {
+      const icon =
+        type === "crypto"
+          ? cryptoIcon(id)
+          : paymentIcon(id);
 
-        const button =
-          document.createElement(
-            "button"
-          );
+      let sub;
 
-
-        button.type =
-          "button";
-
-
-        button.className =
-          "picker-item";
-
-
-        const icon =
-          type === "crypto"
-            ? cryptoIcon(id)
-            : paymentIcon(id);
-
-
-        let sub;
-
-
-        if (type === "crypto") {
-
-          sub =
-            data.name ||
-            id;
-
-        }
-
-        else {
-
-          sub =
-             ${data.currency || ""} • ${
-              data.status === "request"
-                ? "By Request"
-                : "Available"
-            } ;
-
-        }
-
-
-        button.innerHTML =  
-
-          <span class="coin-icon">
-            ${icon}
-          </span>
-
-          <span class="selector-text">
-
-            <b>
-              ${escapeHTML(id)}
-            </b>
-
-            <small>
-              ${escapeHTML(sub)}
-            </small>
-
-          </span>
-
-          <span>
-            ›
-          </span>
-
-         ;
-
-
-        button.onclick =
-          () => {
-
-            if (side === "send") {
-
-              sendAsset =
-                id;
-
-            }
-
-            else {
-
-              receiveAsset =
-                id;
-
-            }
-
-
-            closePicker();
-
-            render();
-
-          };
-
-
-        $("pickerList")
-          .appendChild(
-            button
-          );
-
+      if (type === "crypto") {
+        sub = data.name || id;
+      } else {
+        sub =
+          `${data.currency || ""} • ${
+            data.status === "request"
+              ? "By Request"
+              : "Available"
+          }`;
       }
-    );
 
+      button.innerHTML = `
+        <span class="coin-icon">
+          ${icon}
+        </span>
 
-  $("picker")
-    .classList
-    .remove("hidden");
+        <span class="selector-text">
+          <b>${escapeHTML(id)}</b>
+          <small>${escapeHTML(sub)}</small>
+        </span>
 
+        <span>›</span>
+      `;
+
+      button.onclick = () => {
+        if (side === "send") {
+          sendAsset = id;
+        } else {
+          receiveAsset = id;
+        }
+
+        closePicker();
+        render();
+      };
+
+      $("pickerList").appendChild(button);
+    }
+  );
+
+  $("picker").classList.remove("hidden");
 }
 
 
 /* =========================================================
    CLOSE PICKER
-========================================================= */
+=========================================================
 
 function closePicker() {
 
@@ -1414,7 +1267,7 @@ async function fetchLiveRate() {
 
       const response =
         await fetch(
-           https://api.coinbase.com/v2/exchange-rates?currency=${encodeURIComponent(crypto)} ,
+          `https://api.coinbase.com/v2/exchange-rates?currency=${encodeURIComponent(crypto)}`,
           {
             cache:
               "no-store"
@@ -1473,7 +1326,7 @@ async function fetchLiveRate() {
     catch (error) {
 
       console.warn(
-         Rate failed for ${crypto} ,
+        `Rate failed for ${crypto}`,
         error
       );
 
@@ -1660,7 +1513,7 @@ function renderPayment() {
     ) {
 
       window.open(
-         https://t.me/${support()} ,
+        `https://t.me/${support()}`,
         "_blank"
       );
 
@@ -1671,10 +1524,7 @@ function renderPayment() {
 
     $("paymentTitle")
       .textContent =
-         ${
-          payment.title ||
-          sendAsset
-        } Payment Details ;
+        `${payment.title || sendAsset} Payment Details`;
 
 
     const fields =
@@ -1686,21 +1536,12 @@ function renderPayment() {
       .innerHTML =
         fields
           .map(
-            ([key, value]) =>  
-
+            ([key, value]) => `
               <div class="payment-row">
-
-                <span>
-                  ${escapeHTML(key)}
-                </span>
-
-                <b>
-                  ${escapeHTML(value)}
-                </b>
-
+                <span>${escapeHTML(key)}</span>
+                <b>${escapeHTML(value)}</b>
               </div>
-
-             
+            `
           )
           .join("");
 
@@ -1708,7 +1549,7 @@ function renderPayment() {
     if (!fields.length) {
 
       $("paymentInfo")
-        .innerHTML =  
+        .innerHTML = `
 
           <div class="payment-row">
 
@@ -1722,7 +1563,7 @@ function renderPayment() {
 
           </div>
 
-         ;
+        `;
 
     }
 
@@ -1737,11 +1578,11 @@ function renderPayment() {
 
     $("paymentTitle")
       .textContent =
-         Send ${sendAsset} ;
+        `Send ${sendAsset}`;
 
 
     $("paymentInfo")
-      .innerHTML =  
+      .innerHTML = `
 
         <div class="payment-row">
 
@@ -1798,19 +1639,19 @@ function renderPayment() {
 
         </div>
 
-       ;
+      `;
 
   }
 
 
   $("paySummary")
     .textContent =
-       ${fmt(result.send)} ${sendCurrency()} ;
+      `${fmt(result.send)} ${sendCurrency()}`;
 
 
   $("receiveSummary")
     .textContent =
-       ${fmt(result.receive)} ${receiveCurrency()} ;
+      `${fmt(result.receive)} ${receiveCurrency()}`;
 
 
   $("methodSummary")
@@ -1843,44 +1684,44 @@ function paymentText() {
 
 
   lines.push(
-     Order ID: ${orderId} 
+    `Order ID: ${orderId}`
   );
 
 
   lines.push(
-     Direction: ${
+    `Direction: ${
       isCryptoToPayment()
         ? "Crypto → Payment"
         : "Payment → Crypto"
-    } 
+    }`
   );
 
 
   lines.push(
-     Send: ${
+    `Send: ${
       $("paySummary").textContent
-    } 
+    }`
   );
 
 
   lines.push(
-     Receive: ${
+    `Receive: ${
       $("receiveSummary").textContent
-    } 
+    }`
   );
 
 
   lines.push(
-     Method: ${
+    `Method: ${
       $("methodSummary").textContent
-    } 
+    }`
   );
 
 
   lines.push(
-     Rate: ${
+    `Rate: ${
       $("rateSummary").textContent
-    } 
+    }`
   );
 
 
@@ -1906,7 +1747,7 @@ function paymentText() {
         ([key, value]) => {
 
           lines.push(
-             ${key}: ${value} 
+            `${key}: ${value}`
           );
 
         }
@@ -2358,7 +2199,7 @@ $("submitOrder")
 
       $("successText")
         .textContent =
-           Order ${orderId} has been submitted. Please send your successful payment screenshot to our admin on Telegram with this Order ID. ;
+          `Order ${orderId} has been submitted. Please send your successful payment screenshot to our admin on Telegram with this Order ID.`;
 
 
       $("success")
@@ -2408,30 +2249,30 @@ $("sendTelegram")
 
 
       const text =
-         Payment screenshot for Order ${orderId}\n  +
-         Direction: ${
+        `Payment screenshot for Order ${orderId}\n` +
+        `Direction: ${
           isCryptoToPayment()
             ? "Crypto → Payment"
             : "Payment → Crypto"
-        }\n  +
-         Send: ${
+        }\n` +
+        `Send: ${
           $("paySummary").textContent
-        }\n  +
-         Receive: ${
+        }\n` +
+        `Receive: ${
           $("receiveSummary").textContent
-        }\n  +
-         Method: ${
+        }\n` +
+        `Method: ${
           $("methodSummary").textContent
-        }\n  +
-         Telegram: ${
+        }\n` +
+        `Telegram: ${
           $("telegram")
             .value
             .trim()
-        }\n  +
-         Transaction ID: ${transaction}\n  +
-         Receiving: ${destination}\n  +
-         Network: ${network}\n  +
-         Note: ${note} ;
+        }\n` +
+        `Transaction ID: ${transaction}\n` +
+        `Receiving: ${destination}\n` +
+        `Network: ${network}\n` +
+        `Note: ${note}`;
 
 
       const username =
@@ -2450,7 +2291,7 @@ $("sendTelegram")
 
 
       window.open(
-         https://t.me/${username}?text=${encodeURIComponent(text)} ,
+        `https://t.me/${username}?text=${encodeURIComponent(text)}`,
         "_blank"
       );
 
@@ -2479,12 +2320,12 @@ if (supportUsername) {
 
   $("supportNav")
     .href =
-       https://t.me/${supportUsername} ;
+      `https://t.me/${supportUsername}`;
 
 
   $("contactBtn")
     .href =
-       https://t.me/${supportUsername} ;
+      `https://t.me/${supportUsername}`;
 
 }
 

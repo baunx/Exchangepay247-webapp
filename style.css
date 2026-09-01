@@ -1,51 +1,1383 @@
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:#f5f8ff;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#020817;min-height:100vh}.page-bg{position:fixed;inset:0;z-index:-2;background:radial-gradient(circle at 50% 38%,#0a3972 0,#061a3b 25%,#020817 68%,#010510 100%)}.page-bg:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 45%,#0874e555 0,transparent 20%),radial-gradient(circle at 88% 45%,#0874e555 0,transparent 20%);opacity:.8}.app{max-width:1200px;margin:auto;padding:14px 18px 20px}.navbar{height:82px;border:1px solid #1263ad;border-radius:24px;background:#030b1ce8;display:flex;align-items:center;padding:10px 18px;gap:22px;box-shadow:0 0 30px #008cff22}.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:#fff;min-width:300px}.logo-mark{width:64px;height:54px;position:relative;display:grid;place-items:center;background:linear-gradient(145deg,#ffcc3b,#126bff);clip-path:polygon(12% 0,100% 0,88% 100%,0 100%);border-radius:10px}.logo-mark span{font-size:22px;font-weight:1000;color:#fff}.logo-mark i{position:absolute;right:-1px;top:-4px;color:#20baff;font-size:20px;font-style:normal;font-weight:900}.logo-text{display:flex;flex-direction:column;font-style:italic;line-height:.9}.logo-text b{font-size:24px}.logo-text strong{font-size:25px;color:#ffc83d}.logo-text em{color:#fff;font-style:normal}nav{display:flex;gap:8px;align-items:center;flex:1;justify-content:center}nav a,.contact{color:#c8d4e9;text-decoration:none;padding:13px 17px;border-radius:24px;font-size:14px;white-space:nowrap}.nav-active{background:#082d5d;border:1px solid #087dff;color:#fff;box-shadow:0 0 16px #008cff35}.contact{background:linear-gradient(90deg,#16bce9,#1557ff);color:#fff;font-weight:800;border:1px solid #39cfff;box-shadow:0 8px 25px #006dff44}.hero{text-align:center;padding:34px 10px 20px}.eyebrow{font-weight:800;letter-spacing:4px;font-size:14px;color:#e8edf7}.eyebrow i{display:inline-block;width:115px;height:2px;background:#13aaff;vertical-align:middle;margin:0 16px}.eyebrow b{margin:0 10px;color:#fff}.hero h1{font-size:58px;font-style:italic;margin:10px 0 3px;letter-spacing:-2px}.hero h1 span{color:#f7faff}.hero h1 em{color:#ffc83b;font-style:italic}.hero p{font-size:19px;color:#b9c9e7;margin:0}.exchange-wrap{display:flex;justify-content:center}.exchange-card{width:540px;padding:25px 35px 22px;border:2px solid #05a9ff;border-radius:27px;background:linear-gradient(145deg,#061d42f5,#020c22f8);box-shadow:0 0 30px #008cff55,inset 0 0 35px #0066ff15}.exchange-heading{display:flex;gap:18px;align-items:center;margin-bottom:20px}.exchange-logo{width:70px;height:70px;border:1px solid #159cff;border-radius:22px;display:grid;place-items:center;font-size:38px;color:#ffc83b;background:#041a37}.exchange-heading h2{font-size:26px;margin:0}.exchange-heading h2 em{color:#ffc83b;font-style:normal}.exchange-heading p{margin:5px 0 0;color:#9eb0ce;font-size:13px}.exchange-card label{display:block;font-size:14px;font-weight:800;margin:14px 0 7px}.selector,.amount-box{width:100%;min-height:74px;background:#071a37;border:1px solid #168eff;border-radius:13px;color:#fff;display:flex;align-items:center;text-align:left;padding:10px 16px;gap:13px}.selector{cursor:pointer}.selector-text{flex:1;display:flex;flex-direction:column;gap:4px}.selector-text b{font-size:18px}.selector-text small{font-size:12px;color:#9fb0ca}.coin-icon{width:42px;height:42px;flex:none;border-radius:50%;display:grid;place-items:center;background:#12325e;font-weight:900;font-size:22px;color:#fff}.chevron{font-size:23px}.swap{display:block;margin:-9px auto -8px;position:relative;z-index:2;width:58px;height:58px;border:2px solid #008dff;border-radius:50%;background:#031630;color:#d8eaff;font-size:30px;cursor:pointer}.amount-box{min-height:58px}.amount-box input{flex:1;min-width:0;background:none;border:0;outline:0;color:#dbe9ff;font-size:23px;font-weight:700}.amount-divider{height:34px;width:1px;background:#255181}.amount-token{font-weight:800;white-space:nowrap}.receive-box{margin-top:10px;border:1px solid #196db9;border-radius:13px;background:#071a37;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}.receive-box>div:first-child{display:flex;flex-direction:column;gap:5px}.receive-box span{font-size:13px;color:#b2c3df}.receive-box strong{font-size:27px}.receive-method{display:flex;align-items:center;gap:8px}.receive-method .coin-icon{width:42px;height:42px}.receive-method span:nth-child(2){display:flex;flex-direction:column}.receive-method b{font-size:16px}.receive-method small{font-size:11px;color:#a6b8d4}.rates{display:flex;align-items:center;justify-content:space-between;border:1px solid #164a82;border-radius:30px;margin-top:12px;padding:10px 17px;background:#061633}.rates>div{display:flex;flex-direction:column;gap:4px}.rates span{font-size:12px;color:#a5b6d0}.rates b{font-size:12px}.rates>div:last-child b{color:#ffc83b}.rate-arrow{font-size:24px;color:#a9c9ef}.continue{width:100%;border:0;border-radius:28px;padding:14px;margin-top:13px;background:linear-gradient(90deg,#13d2ee,#1557ff);color:#fff;font-size:18px;font-weight:900;box-shadow:0 8px 25px #007cff44;cursor:pointer}.continue span{font-size:25px;margin-left:8px}.rate-status{text-align:center;color:#778baa;font-size:10px;margin-top:8px}.rate-status.ok{color:#42df9a}.features{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 20px}.features>div{min-height:100px;border:1px solid #125da0;border-radius:17px;background:#03142de8;display:flex;align-items:center;gap:14px;padding:16px 20px}.feature-icon{width:50px;height:50px;border:1px solid #0b86e9;border-radius:13px;display:grid;place-items:center;color:#ffc83b;font-size:30px;background:#082852}.features b{display:block;color:#ffc83b;font-size:14px}.features small{display:block;color:#9db0ce;margin-top:5px}.how{text-align:center;padding:25px 0}.how h2{font-size:25px}.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.how-grid div{padding:18px;border:1px solid #134f87;border-radius:14px;background:#031329}.how-grid b{display:block;color:#ffc83b}.how-grid strong{display:block;margin:7px}.how-grid span{font-size:11px;color:#899bb8}footer{text-align:center;padding:24px 0;color:#8fa1bf}.footer-brand{display:flex;align-items:center;justify-content:center;gap:10px;font-size:22px;font-style:italic}.footer-brand .logo-mark{width:45px;height:38px}.footer-brand span{color:#ffc83b}.modal,.drawer{position:fixed;inset:0;z-index:20;background:#0009;display:flex;align-items:flex-end;justify-content:center;padding:15px}.modal-panel,.drawer-card{width:min(600px,100%);max-height:92vh;overflow:auto;background:#06162e;border:1px solid #168eff;border-radius:24px;padding:20px;box-shadow:0 0 50px #008cff33}.modal-head{display:flex;justify-content:space-between;margin-bottom:10px}.modal-head button,.drawer-close{border:0;background:#102b4c;color:#fff;padding:9px 12px;border-radius:9px}.picker-item{width:100%;display:flex;align-items:center;gap:12px;border:1px solid #173f6a;background:#071a35;color:#fff;border-radius:12px;padding:12px;margin:7px 0;text-align:left}.drawer-title{display:flex;gap:14px;align-items:center;margin:20px 0}.drawer-title>span{font-size:13px;color:#ffc83b}.drawer-title h2{margin:0}.drawer-title p{margin:4px 0;color:#899bb8;font-size:11px}.order-id{color:#56a4ff;font-size:11px;margin-bottom:10px}.info-card,.summary{background:#081b35;border:1px solid #1b4778;border-radius:14px;padding:15px;margin:12px 0}.info-card h3{margin:0 0 10px}.payment-row,.summary>div{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #173350;font-size:12px}.payment-row span,.summary span{color:#8da0bb}.secondary{width:100%;border:0;border-radius:10px;background:#112b4b;color:#d9e7fb;padding:12px;font-weight:800;margin-top:12px}.notice,.telegram-note{padding:12px;border-radius:11px;background:#241d0d;color:#e3c77f;font-size:11px;display:flex;gap:10px}.field{margin:12px 0}.field label{display:block;font-size:11px;color:#8ea0bb;margin-bottom:6px}.field input,.field textarea,.field select{width:100%;border:1px solid #244c78;border-radius:10px;background:#04142a;color:#fff;padding:12px;outline:0}.telegram-note{background:#092b49;color:#b9d6f3}.telegram-note p{margin:4px 0;color:#8da8c7}.check{display:flex;gap:8px;color:#9badc6;font-size:11px;margin:15px 0}.success{text-align:center;padding:15px}.success-mark{width:52px;height:52px;margin:auto;display:grid;place-items:center;border-radius:50%;background:#159b6b;font-size:28px}.hidden{display:none!important}
-@media(max-width:800px){.navbar{height:auto;flex-wrap:wrap}.logo{min-width:0;flex:1}.logo-text b{font-size:18px}.logo-text strong{font-size:19px}nav{order:3;width:100%;overflow:auto;justify-content:flex-start}nav a{padding:9px 12px;font-size:12px}.contact span{display:none}.hero h1{font-size:40px}.eyebrow i{width:45px;margin:0 8px}.hero p{font-size:14px}.exchange-card{width:100%;padding:20px}.features{grid-template-columns:repeat(2,1fr)}.how-grid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:480px){.app{padding:8px 10px}.navbar{border-radius:17px;padding:9px}.logo-mark{width:48px;height:43px}.logo-text b{font-size:15px}.logo-text strong{font-size:17px}nav a span{display:inline}.hero{padding-top:24px}.hero h1{font-size:34px}.eyebrow{font-size:10px;letter-spacing:2px}.exchange-heading h2{font-size:22px}.exchange-heading p{font-size:11px}.features{gap:8px}.features>div{padding:12px;min-height:88px}.feature-icon{width:40px;height:40px}.how-grid{grid-template-columns:1fr 1fr}}
-
-/* Typography refinement — compact mobile-first sizing */
-.navbar .logo-text b{font-size:21px}
-.navbar .logo-text strong{font-size:22px}
-nav a,.contact{font-size:13px}
-.hero{padding-top:30px}
-.hero h1{font-size:52px}
-.hero p{font-size:17px}
-.eyebrow{font-size:13px}
-.exchange-card{padding:23px 32px 20px}
-.exchange-heading h2{font-size:24px}
-.exchange-card label{font-size:13px}
-.selector-text b{font-size:16px}
-.selector-text small{font-size:11px}
-.amount-box input{font-size:21px}
-.receive-box strong{font-size:24px}
-.receive-method b{font-size:15px}
-.rates span{font-size:11px}
-.rates b{font-size:11px}
-.continue{font-size:16px;padding:13px}
-.features b{font-size:13px}
-.how h2{font-size:23px}
-
-@media(max-width:800px){
-  .logo-text b{font-size:17px}
-  .logo-text strong{font-size:18px}
-  .hero h1{font-size:36px}
-  .hero p{font-size:14px}
-  .exchange-card{padding:19px 20px}
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
-@media(max-width:480px){
-  .logo-text b{font-size:14px}
-  .logo-text strong{font-size:16px}
-  .hero{padding:20px 6px 15px}
-  .hero h1{font-size:31px;letter-spacing:-1px}
-  .hero p{font-size:13px}
-  .eyebrow{font-size:9px}
-  .exchange-heading{gap:13px;margin-bottom:16px}
-  .exchange-heading h2{font-size:20px}
-  .exchange-heading p{font-size:10px}
-  .exchange-card label{font-size:12px}
-  .selector{min-height:66px;padding:9px 12px}
-  .coin-icon{width:38px;height:38px;font-size:20px}
-  .selector-text b{font-size:15px}
-  .amount-box input{font-size:20px}
-  .receive-box strong{font-size:22px}
-  .continue{font-size:15px}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family:
+    -apple-system,
+    BlinkMacSystemFont,
+    "SF Pro Display",
+    "SF Pro Text",
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  background: #f3f5f7;
+  color: #17202a;
+  line-height: 1.4;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+
+/* ==================================================
+   APP
+================================================== */
+
+.app {
+  width: 100%;
+  max-width: 560px;
+  min-height: 100vh;
+  margin: 0 auto;
+  background: #f3f5f7;
+  padding-bottom: 80px;
+}
+
+
+/* ==================================================
+   HEADER
+================================================== */
+
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  min-height: 72px;
+  padding: 14px 18px;
+
+  background: rgba(255, 255, 255, 0.94);
+  border-bottom: 1px solid #e4e8ec;
+
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: #17202a;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.brand {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+}
+
+.muted {
+  margin-top: 1px;
+  color: #7b8794;
+  font-size: 12px;
+}
+
+.support-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 8px 10px;
+
+  border: 1px solid #e0e5e9;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  color: #4c5965;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.support-icon {
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #edf1f4;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+/* ==================================================
+   MAIN
+================================================== */
+
+main {
+  padding: 0 15px;
+}
+
+
+/* ==================================================
+   STEPS
+================================================== */
+
+.steps {
+  display: flex;
+  align-items: center;
+
+  padding: 18px 3px 14px;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  color: #9aa4ad;
+  white-space: nowrap;
+}
+
+.step b {
+  width: 25px;
+  height: 25px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #e4e8ec;
+
+  color: #78838d;
+  font-size: 11px;
+}
+
+.step span {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.step.active {
+  color: #17202a;
+}
+
+.step.active b {
+  background: #17202a;
+  color: #ffffff;
+}
+
+.line {
+  flex: 1;
+  height: 1px;
+  margin: 0 8px;
+  background: #dfe4e8;
+}
+
+
+/* ==================================================
+   HERO
+================================================== */
+
+.hero {
+  padding: 20px 8px 22px;
+  text-align: center;
+}
+
+.hero-logo {
+  width: 56px;
+  height: 56px;
+
+  margin: 0 auto 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 17px;
+
+  background: #ffffff;
+  border: 1px solid #e0e5e9;
+
+  color: #17202a;
+
+  font-size: 17px;
+  font-weight: 900;
+
+  box-shadow:
+    0 5px 18px rgba(30, 40, 50, 0.06);
+}
+
+.hero h1 {
+  margin: 0;
+
+  font-size: 23px;
+  line-height: 1.2;
+
+  letter-spacing: -0.5px;
+}
+
+.hero p {
+  margin: 6px 0 0;
+
+  color: #7b8794;
+
+  font-size: 13px;
+}
+
+
+/* ==================================================
+   EXCHANGE CARD
+================================================== */
+
+.exchange-card {
+  margin-bottom: 10px;
+  padding: 15px;
+
+  border: 1px solid #e1e6ea;
+  border-radius: 17px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 5px 18px rgba(30, 40, 50, 0.045);
+}
+
+.exchange-label {
+  margin-bottom: 9px;
+
+  color: #7c8791;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+  letter-spacing: 0.45px;
+}
+
+
+/* ==================================================
+   ASSET SELECTOR
+================================================== */
+
+.asset-selector {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0;
+
+  border: 0;
+  background: transparent;
+
+  color: inherit;
+  text-align: left;
+}
+
+.asset-icon {
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background: #f0f3f5;
+
+  color: #17202a;
+
+  font-size: 20px;
+  font-weight: 800;
+
+  overflow: hidden;
+}
+
+.asset-logo {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.asset-info {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  margin-left: 11px;
+}
+
+.asset-info strong {
+  color: #17202a;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.asset-info small {
+  margin-top: 2px;
+
+  color: #89939d;
+
+  font-size: 11px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selector-arrow {
+  margin-left: 8px;
+
+  color: #9aa4ad;
+
+  font-size: 25px;
+  line-height: 1;
+}
+
+
+/* ==================================================
+   AMOUNT
+================================================== */
+
+.amount-box {
+  display: flex;
+  align-items: center;
+
+  margin-top: 14px;
+  padding: 12px 13px;
+
+  border: 1px solid #e1e6ea;
+  border-radius: 13px;
+
+  background: #f8f9fa;
+}
+
+.amount-box input {
+  width: 100%;
+  min-width: 0;
+
+  border: 0;
+  outline: 0;
+
+  background: transparent;
+
+  color: #17202a;
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.amount-box input::placeholder {
+  color: #aeb6bd;
+}
+
+.amount-token {
+  flex: 0 0 auto;
+
+  margin-left: 8px;
+
+  color: #68747f;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+
+/* ==================================================
+   SWAP
+================================================== */
+
+.swap-wrap {
+  position: relative;
+  z-index: 2;
+
+  height: 0;
+
+  display: flex;
+  justify-content: center;
+}
+
+.swap-button {
+  width: 42px;
+  height: 42px;
+
+  margin-top: -21px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 5px solid #f3f5f7;
+  border-radius: 50%;
+
+  background: #17202a;
+  color: #ffffff;
+
+  font-size: 19px;
+  font-weight: 700;
+
+  box-shadow:
+    0 4px 12px rgba(30, 40, 50, 0.15);
+}
+
+.swap-button:active {
+  transform: scale(0.95);
+}
+
+
+/* ==================================================
+   RECEIVE RESULT
+================================================== */
+
+.receive-result {
+  display: flex;
+  align-items: center;
+
+  margin-top: 13px;
+  padding: 12px;
+
+  border-radius: 13px;
+
+  background: #f8f9fa;
+}
+
+.receive-icon-small {
+  width: 35px;
+  height: 35px;
+
+  flex: 0 0 35px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  overflow: hidden;
+
+  font-size: 17px;
+}
+
+.receive-result-info {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  margin-left: 10px;
+}
+
+.receive-result-info strong {
+  font-size: 17px;
+  font-weight: 800;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.receive-result-info small {
+  margin-top: 1px;
+
+  color: #89939d;
+
+  font-size: 11px;
+}
+
+
+/* ==================================================
+   RATE
+================================================== */
+
+.rate-card {
+  margin: 10px 0;
+
+  padding: 13px 15px;
+
+  border: 1px solid #e1e6ea;
+  border-radius: 15px;
+
+  background: #ffffff;
+}
+
+.rate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 4px 0;
+
+  gap: 12px;
+}
+
+.rate-row span {
+  color: #7c8791;
+  font-size: 11px;
+}
+
+.rate-row strong {
+  color: #3b4650;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-align: right;
+}
+
+.rate-status {
+  margin-top: 7px;
+
+  color: #8b969f;
+
+  font-size: 10px;
+  text-align: right;
+}
+
+.rate-status.ok {
+  color: #4f7c5c;
+}
+
+
+/* ==================================================
+   PRIMARY BUTTON
+================================================== */
+
+.primary {
+  width: 100%;
+
+  min-height: 49px;
+
+  margin-top: 8px;
+
+  border: 0;
+  border-radius: 13px;
+
+  background: #17202a;
+  color: #ffffff;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  letter-spacing: 0.25px;
+
+  box-shadow:
+    0 5px 14px rgba(30, 40, 50, 0.12);
+}
+
+.primary:active {
+  transform: scale(0.99);
+}
+
+
+/* ==================================================
+   DRAWERS / STEPS
+================================================== */
+
+.hidden {
+  display: none !important;
+}
+
+.drawer {
+  padding-bottom: 20px;
+}
+
+.page-title {
+  display: flex;
+  align-items: flex-start;
+
+  padding: 14px 2px 18px;
+}
+
+.page-title h2 {
+  margin: 0;
+
+  font-size: 20px;
+  line-height: 1.25;
+
+  letter-spacing: -0.3px;
+}
+
+.page-title p {
+  margin: 5px 0 0;
+
+  color: #7f8a94;
+
+  font-size: 12px;
+}
+
+.back {
+  width: 34px;
+  height: 34px;
+
+  flex: 0 0 34px;
+
+  margin-right: 10px;
+
+  border: 1px solid #e0e5e9;
+  border-radius: 10px;
+
+  background: #ffffff;
+  color: #4d5964;
+
+  font-size: 23px;
+  line-height: 1;
+}
+
+
+/* ==================================================
+   ORDER BADGE
+================================================== */
+
+.order-badge {
+  display: inline-flex;
+
+  margin-bottom: 10px;
+  padding: 6px 9px;
+
+  border-radius: 8px;
+
+  background: #e9edf0;
+
+  color: #697580;
+
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+}
+
+
+/* ==================================================
+   CARD
+================================================== */
+
+.card {
+  margin-bottom: 10px;
+  padding: 15px;
+
+  border: 1px solid #e1e6ea;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 4px 16px rgba(30, 40, 50, 0.04);
+}
+
+.section-title {
+  margin-bottom: 13px;
+
+  color: #27323b;
+
+  font-size: 13px;
+  font-weight: 800;
+}
+
+
+/* ==================================================
+   PAYMENT ROW
+================================================== */
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 15px;
+
+  padding: 10px 0;
+
+  border-bottom: 1px solid #edf0f2;
+}
+
+.payment-row:last-child {
+  border-bottom: 0;
+}
+
+.payment-row span {
+  color: #7c8791;
+  font-size: 11px;
+}
+
+.payment-row b {
+  max-width: 62%;
+
+  color: #27323b;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-align: right;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* ==================================================
+   COPY
+================================================== */
+
+.copy {
+  width: 100%;
+
+  min-height: 42px;
+
+  margin-top: 11px;
+
+  border: 1px solid #dce2e6;
+  border-radius: 11px;
+
+  background: #f7f8f9;
+
+  color: #4e5a65;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+/* ==================================================
+   SUMMARY
+================================================== */
+
+.summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  padding: 7px 0;
+}
+
+.summary-row span {
+  color: #7c8791;
+  font-size: 11px;
+}
+
+.summary-row strong {
+  color: #27323b;
+
+  font-size: 11px;
+  font-weight: 800;
+
+  text-align: right;
+}
+
+
+/* ==================================================
+   WARNING
+================================================== */
+
+.warning {
+  margin: 10px 0;
+
+  padding: 12px 13px;
+
+  border: 1px solid #e5e1d5;
+  border-radius: 12px;
+
+  background: #faf8f0;
+
+  color: #756d5c;
+
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+
+/* ==================================================
+   TELEGRAM
+================================================== */
+
+.telegram-box {
+  display: flex;
+  align-items: flex-start;
+
+  margin-bottom: 14px;
+  padding: 12px;
+
+  border-radius: 12px;
+
+  background: #f5f7f8;
+}
+
+.tg-icon {
+  width: 36px;
+  height: 36px;
+
+  flex: 0 0 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: #e9edf0;
+
+  color: #46525d;
+
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.telegram-box > div:last-child {
+  min-width: 0;
+  margin-left: 10px;
+}
+
+.telegram-box b {
+  color: #27323b;
+  font-size: 11px;
+}
+
+.telegram-box p {
+  margin: 4px 0 0;
+
+  color: #818c96;
+
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+
+/* ==================================================
+   FORM
+================================================== */
+
+.field {
+  margin-top: 13px;
+}
+
+.field:first-of-type {
+  margin-top: 0;
+}
+
+.field label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #697580;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.field label span {
+  color: #a1a9b0;
+  font-weight: 500;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+
+  border: 1px solid #dfe4e8;
+  border-radius: 11px;
+
+  outline: none;
+
+  background: #fafbfc;
+  color: #27323b;
+
+  font-size: 12px;
+}
+
+.field input,
+.field select {
+  height: 43px;
+  padding: 0 11px;
+}
+
+.field textarea {
+  padding: 10px 11px;
+  resize: vertical;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: #aeb7bf;
+  background: #ffffff;
+}
+
+
+/* ==================================================
+   CHECKBOX
+================================================== */
+
+.check {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 8px;
+
+  margin: 14px 2px;
+
+  color: #66727d;
+
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.check input {
+  width: 16px;
+  height: 16px;
+
+  flex: 0 0 16px;
+
+  margin: 0;
+}
+
+
+/* ==================================================
+   SUCCESS
+================================================== */
+
+.success {
+  margin-top: 15px;
+
+  padding: 20px 15px;
+
+  border: 1px solid #dfe5e1;
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  text-align: center;
+}
+
+.success-icon {
+  width: 45px;
+  height: 45px;
+
+  margin: 0 auto 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #eef4ef;
+
+  color: #52745b;
+
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.success h2 {
+  margin: 0;
+
+  font-size: 18px;
+}
+
+.success p {
+  margin: 8px 0;
+
+  color: #7b8791;
+
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+
+/* ==================================================
+   PICKER OVERLAY
+================================================== */
+
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+
+  z-index: 100;
+
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  background: rgba(20, 27, 34, 0.38);
+
+  padding: 0;
+}
+
+.picker {
+  width: 100%;
+  max-width: 560px;
+  max-height: 82vh;
+
+  overflow-y: auto;
+
+  padding: 15px;
+
+  border-radius: 20px 20px 0 0;
+
+  background: #f7f8f9;
+
+  box-shadow:
+    0 -8px 30px rgba(20, 30, 40, 0.15);
+}
+
+.picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+}
+
+.picker-header h3 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.picker-close {
+  width: 34px;
+  height: 34px;
+
+  border: 0;
+  border-radius: 50%;
+
+  background: #e8ecef;
+  color: #596570;
+
+  font-size: 22px;
+  line-height: 1;
+}
+
+
+/* ==================================================
+   PICKER SWITCH
+================================================== */
+
+.picker-switch {
+  display: flex;
+
+  gap: 5px;
+
+  margin-bottom: 10px;
+  padding: 4px;
+
+  border-radius: 11px;
+
+  background: #e8ecef;
+}
+
+.picker-switch button {
+  flex: 1;
+
+  min-height: 35px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+
+  color: #7a858f;
+
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.picker-switch button.active {
+  background: #ffffff;
+  color: #27323b;
+
+  box-shadow:
+    0 2px 5px rgba(20, 30, 40, 0.07);
+}
+
+
+/* ==================================================
+   PICKER ITEM
+================================================== */
+
+.picker-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 7px;
+}
+
+.picker-item {
+  width: 100%;
+
+  min-height: 58px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 9px 11px;
+
+  border: 1px solid #e0e5e9;
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  color: #27323b;
+
+  text-align: left;
+}
+
+.picker-item:active {
+  background: #f3f5f6;
+}
+
+.coin-icon {
+  width: 38px;
+  height: 38px;
+
+  flex: 0 0 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 11px;
+
+  background: #f0f3f5;
+
+  overflow: hidden;
+
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.picker-logo {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: contain;
+}
+
+.selector-text {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  margin-left: 10px;
+}
+
+.selector-text b {
+  font-size: 12px;
+  font-weight: 800;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.selector-text small {
+  margin-top: 2px;
+
+  color: #89939d;
+
+  font-size: 10px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.picker-item > span:last-child {
+  margin-left: 8px;
+
+  color: #a0a8af;
+
+  font-size: 20px;
+}
+
+
+/* ==================================================
+   CONTACT BUTTON
+================================================== */
+
+.contact-button {
+  position: fixed;
+
+  right: 15px;
+  bottom: 16px;
+
+  z-index: 50;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 9px 12px;
+
+  border: 1px solid #dfe4e8;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.95);
+
+  color: #4e5a65;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  box-shadow:
+    0 5px 18px rgba(30, 40, 50, 0.10);
+
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.contact-icon {
+  width: 22px;
+  height: 22px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  background: #eef1f3;
+
+  font-size: 11px;
+  font-weight: 900;
+}
+
+
+/* ==================================================
+   FOOTER
+================================================== */
+
+footer {
+  padding: 28px 15px 20px;
+
+  color: #9aa3aa;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  text-align: center;
+
+  letter-spacing: 0.3px;
+}
+
+footer span {
+  padding: 0 4px;
+}
+
+
+/* ==================================================
+   SMALL PHONES
+================================================== */
+
+@media (max-width: 360px) {
+
+  main {
+    padding: 0 12px;
+  }
+
+  .top {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .brand {
+    font-size: 14px;
+  }
+
+  .hero h1 {
+    font-size: 21px;
+  }
+
+  .amount-box input {
+    font-size: 20px;
+  }
+
+  .step span {
+    font-size: 10px;
+  }
+
+}
+
+
+/* ==================================================
+   SAFE AREA — iPHONE
+================================================== */
+
+@supports (padding: max(0px)) {
+
+  .app {
+    padding-bottom:
+      max(80px, env(safe-area-inset-bottom));
+  }
+
+  .contact-button {
+    bottom:
+      max(16px, env(safe-area-inset-bottom));
+  }
+
 }

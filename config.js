@@ -5,34 +5,23 @@ window.CONFIG = {
   // ==================================================
 
   settings: {
-
-    // Your internal exchange fee.
-    // This is NOT displayed to customers.
     feePercent: 28.00,
-
-    // Live rate refresh interval
-    // 60000 = 60 seconds
     refreshMs: 60000,
 
-    // Telegram admin
     adminTelegram: "@exchangepay2477",
-
-    // Telegram support
     supportTelegram: "@exchangepay2477"
   },
 
 
   // ==================================================
-  // CRYPTO
+  // CRYPTO ASSETS
   // ==================================================
 
   crypto: {
 
     USDT: {
       name: "Tether USDT",
-
       icon: "assets/icons/usdt.svg",
-
       networks: [
         "TRC20",
         "ERC20",
@@ -43,9 +32,7 @@ window.CONFIG = {
 
     BTC: {
       name: "Bitcoin",
-
       icon: "assets/icons/btc.svg",
-
       networks: [
         "Bitcoin"
       ]
@@ -53,9 +40,7 @@ window.CONFIG = {
 
     ETH: {
       name: "Ethereum",
-
       icon: "assets/icons/eth.svg",
-
       networks: [
         "ERC20"
       ]
@@ -71,13 +56,9 @@ window.CONFIG = {
   paymentMethods: {
 
     "Bank US": {
-
       status: "available",
-
       currency: "USD",
-
       title: "Bank US",
-
       icon: "assets/icons/bank-us.svg",
 
       fields: [
@@ -90,13 +71,9 @@ window.CONFIG = {
 
 
     "Bank EU": {
-
       status: "available",
-
       currency: "EUR",
-
       title: "Bank EU",
-
       icon: "assets/icons/bank-eu.svg",
 
       fields: [
@@ -108,13 +85,9 @@ window.CONFIG = {
 
 
     "Zelle": {
-
       status: "available",
-
       currency: "USD",
-
       title: "Zelle",
-
       icon: "assets/icons/zelle.svg",
 
       fields: [
@@ -125,13 +98,9 @@ window.CONFIG = {
 
 
     "Venmo": {
-
       status: "request",
-
       currency: "USD",
-
       title: "Venmo",
-
       icon: "assets/icons/venmo.svg",
 
       fields: []
@@ -139,13 +108,9 @@ window.CONFIG = {
 
 
     "Cash App": {
-
       status: "request",
-
       currency: "USD",
-
       title: "Cash App",
-
       icon: "assets/icons/cashapp.svg",
 
       fields: []
@@ -153,13 +118,9 @@ window.CONFIG = {
 
 
     "PayPal": {
-
       status: "request",
-
       currency: "USD",
-
       title: "PayPal",
-
       icon: "assets/icons/paypal.svg",
 
       fields: []
@@ -167,13 +128,9 @@ window.CONFIG = {
 
 
     "Wise": {
-
       status: "request",
-
       currency: "USD",
-
       title: "Wise",
-
       icon: "assets/icons/wise.svg",
 
       fields: []

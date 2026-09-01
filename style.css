@@ -1381,3 +1381,389 @@ footer span {
   }
 
 }
+/* =========================================================
+EXCHANGEPAY247 — TWO WAY EXCHANGE ADDITIONS
+========================================================= */
+
+/* ==========================================
+SEND TYPE SWITCH
+========================================== */
+
+.direction-switch {
+
+display: grid;
+
+grid-template-columns:
+1fr 1fr;
+
+gap: 6px;
+
+margin:
+0 0 12px;
+
+padding: 4px;
+
+background:
+#eef1f5;
+
+border-radius:
+12px;
+
+}
+
+.direction-btn {
+
+border: 0;
+
+background:
+transparent;
+
+color:
+#6b7280;
+
+padding:
+10px 12px;
+
+border-radius:
+9px;
+
+font-size:
+13px;
+
+font-weight:
+700;
+
+cursor:
+pointer;
+
+transition:
+.2s ease;
+
+}
+
+.direction-btn:hover {
+
+color:
+#111827;
+
+}
+
+.direction-btn.active {
+
+background:
+#ffffff;
+
+color:
+#111827;
+
+box-shadow:
+0 2px 7px
+rgba(0,0,0,.08);
+
+}
+
+/* ==========================================
+AUTOMATIC RECEIVE TYPE
+========================================== */
+
+.auto-direction {
+
+display:
+inline-flex;
+
+align-items:
+center;
+
+justify-content:
+center;
+
+padding:
+7px 12px;
+
+margin:
+0 0 12px;
+
+border-radius:
+999px;
+
+background:
+#eef1f5;
+
+color:
+#667085;
+
+font-size:
+12px;
+
+font-weight:
+700;
+
+text-transform:
+uppercase;
+
+letter-spacing:
+.04em;
+
+}
+
+/* ==========================================
+BOTH AMOUNT INPUTS
+========================================== */
+
+.amount-box {
+
+display:
+flex;
+
+align-items:
+center;
+
+gap:
+10px;
+
+}
+
+.amount-box input {
+
+flex:
+1;
+
+min-width:
+0;
+
+width:
+100%;
+
+}
+
+/* ==========================================
+RECEIVE AMOUNT
+========================================== */
+
+#receiveAmount {
+
+font-weight:
+700;
+
+}
+
+/* ==========================================
+NETWORK PREVIEW
+========================================== */
+
+.network-preview {
+
+display:
+flex;
+
+align-items:
+center;
+
+justify-content:
+space-between;
+
+gap:
+12px;
+
+margin:
+10px 0;
+
+padding:
+12px 14px;
+
+border:
+1px solid
+#e5e7eb;
+
+border-radius:
+12px;
+
+background:
+#ffffff;
+
+font-size:
+13px;
+
+}
+
+.network-preview span {
+
+color:
+#667085;
+
+}
+
+.network-preview strong {
+
+color:
+#111827;
+
+}
+
+/* ==========================================
+HIDDEN
+========================================== */
+
+.hidden {
+
+display:
+none !important;
+
+}
+
+/* ==========================================
+ASSET LOGO
+========================================== */
+
+.asset-logo {
+
+width:
+28px;
+
+height:
+28px;
+
+object-fit:
+contain;
+
+display:
+block;
+
+}
+
+/* ==========================================
+PICKER ICON
+========================================== */
+
+.coin-icon {
+
+width:
+42px;
+
+height:
+42px;
+
+min-width:
+42px;
+
+display:
+flex;
+
+align-items:
+center;
+
+justify-content:
+center;
+
+border-radius:
+50%;
+
+background:
+#f2f4f7;
+
+overflow:
+hidden;
+
+font-size:
+20px;
+
+}
+
+/* ==========================================
+PICKER ITEM
+========================================== */
+
+.picker-item {
+
+width:
+100%;
+
+display:
+flex;
+
+align-items:
+center;
+
+gap:
+12px;
+
+}
+
+.selector-text {
+
+flex:
+1;
+
+min-width:
+0;
+
+display:
+flex;
+
+flex-direction:
+column;
+
+gap:
+3px;
+
+text-align:
+left;
+
+}
+
+.selector-text b {
+
+font-size:
+14px;
+
+}
+
+.selector-text small {
+
+font-size:
+12px;
+
+color:
+#667085;
+
+}
+
+/* ==========================================
+MOBILE
+========================================== */
+
+@media (
+max-width: 520px
+) {
+
+.direction-btn {
+
+```
+padding:
+  9px 8px;
+
+font-size:
+  12px;
+```
+
+}
+
+.auto-direction {
+
+```
+font-size:
+  11px;
+```
+
+}
+
+.network-preview {
+
+```
+font-size:
+  12px;
+```
+
+}
+
+}

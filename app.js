@@ -1,9 +1,10 @@
-let sendType = "crypto";
-let receiveType = "payment";
+/* =========================================================
+   EXCHANGEPAY247 — APP.JS
+   Dynamic Crypto + Payment Method Configuration
+   ========================================================= */
 
 let sendAsset = "USDT";
 let receiveMethod = "Bank US";
-
 let pickerType = "";
 
 let live = {
@@ -12,6 +13,11 @@ let live = {
 };
 
 let orderId = "";
+
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
 
 const $ = id => document.getElementById(id);
 
@@ -40,437 +46,267 @@ const support = () =>
 const fee = () =>
   Number(settings().feePercent || 0) / 100;
 
-const fmt = number =>
-  Number(number).toLocaleString(undefined, {
+const fmt = n =>
+  Number(n).toLocaleString(undefined, {
     maximumFractionDigits: 8
   });
 
 
-// ==================================================
-// ICON
-// ==================================================
+/* =========================================================
+   LOGO SYSTEM
+   config.js can define:
+   icon: "assets/icons/usdt.svg"
 
-function cryptoIcon(asset) {
+   If no icon exists, fallback symbol is used.
+   ========================================================= */
 
-  const data = cryptos()[asset];
+function iconAsset(asset) {
 
-  if (data && data.icon) {
+  const data = cryptos()[asset] || {};
 
+  if (data.icon) {
     return `
       <img
+        class="asset-logo"
         src="${data.icon}"
         alt="${asset}"
-        class="asset-logo"
+        onerror="this.style.display='none';this.parentElement.innerText='${fallbackAssetIcon(asset)}'"
       >
     `;
   }
 
-  return asset;
+  return fallbackAssetIcon(asset);
 }
 
 
-function paymentIcon(method) {
+function iconMethod(method) {
 
-  const data = payments()[method];
+  const data = payments()[method] || {};
 
-  if (data && data.icon) {
-
+  if (data.icon) {
     return `
       <img
+        class="asset-logo"
         src="${data.icon}"
         alt="${method}"
-        class="asset-logo"
+        onerror="this.style.display='none';this.parentElement.innerText='${fallbackMethodIcon(method)}'"
       >
     `;
   }
 
-  return "◆";
+  return fallbackMethodIcon(method);
 }
 
 
-// ==================================================
-// DATA
-// ==================================================
+function fallbackAssetIcon(asset) {
 
-function sendData() {
+  return {
+    USDT: "₮",
+    BTC: "₿",
+    ETH: "Ξ",
+    USDC: "$",
+    SOL: "◎"
+  }[asset] || "◆";
 
-  if (sendType === "crypto") {
-
-    return cryptos()[sendAsset] || {};
-
-  }
-
-  return payments()[sendAsset] || {};
 }
 
 
-function receiveData() {
+function fallbackMethodIcon(method) {
 
-  if (receiveType === "crypto") {
+  return {
+    "Bank US": "🏦",
+    "Bank EU": "🏦",
+    "Bank Canada": "🏦",
+    "Bank Australia": "🏦",
+    Zelle: "Z",
+    Venmo: "V",
+    "Cash App": "$",
+    PayPal: "P",
+    Wise: "W",
+    "E-Wallet": "◆"
+  }[method] || "◆";
 
-    return cryptos()[receiveMethod] || {};
+}
 
-  }
+
+/* =========================================================
+   CURRENT DATA
+   ========================================================= */
+
+function methodData() {
 
   return payments()[receiveMethod] || {};
+
 }
 
 
-// ==================================================
-// CURRENCY
-// ==================================================
+function currency() {
 
-function sendCurrency() {
+  return methodData().currency || "USD";
 
-  if (sendType === "crypto") {
-
-    return sendAsset;
-
-  }
-
-  return sendData().currency || "USD";
 }
 
 
-function receiveCurrency() {
-
-  if (receiveType === "crypto") {
-
-    return receiveMethod;
-
-  }
-
-  return receiveData().currency || "USD";
-}
-
-
-// ==================================================
-// RENDER MAIN EXCHANGE
-// ==================================================
+/* =========================================================
+   RENDER MAIN EXCHANGE
+   ========================================================= */
 
 function render() {
 
-  const send = sendData();
+  const crypto = cryptos()[sendAsset] || {};
+  const payment = methodData();
 
-  const receive = receiveData();
 
-
-  // ----------------------------------------------
-  // SEND
-  // ----------------------------------------------
+  /* SEND */
 
   $("sendIcon").innerHTML =
-
-    sendType === "crypto"
-
-      ? cryptoIcon(sendAsset)
-
-      : paymentIcon(sendAsset);
-
+    iconAsset(sendAsset);
 
   $("sendName").textContent =
-    sendType === "crypto"
-      ? sendAsset
-      : sendAsset;
-
+    sendAsset;
 
   $("sendSub").textContent =
-
-    sendType === "crypto"
-
-      ? (
-          send.name ||
-          sendAsset
-        )
-
-      : (
-          `${send.currency || "USD"} • ` +
-          (
-            send.status === "request"
-              ? "By Request"
-              : "Available"
-          )
-        );
+    crypto.name || sendAsset;
 
 
-  // ----------------------------------------------
-  // RECEIVE
-  // ----------------------------------------------
+  /* RECEIVE */
 
   $("receiveIcon").innerHTML =
-
-    receiveType === "crypto"
-
-      ? cryptoIcon(receiveMethod)
-
-      : paymentIcon(receiveMethod);
-
+    iconMethod(receiveMethod);
 
   $("receiveName").textContent =
-    receiveType === "crypto"
-      ? receiveMethod
-      : receiveMethod;
-
+    receiveMethod;
 
   $("receiveSub").textContent =
-
-    receiveType === "crypto"
-
-      ? (
-          receive.name ||
-          receiveMethod
-        )
-
-      : (
-          `${receive.currency || "USD"} • ` +
-          (
-            receive.status === "request"
-              ? "By Request"
-              : "Available"
-          )
-        );
+    `${payment.currency || "USD"} • ${
+      payment.status === "request"
+        ? "By Request"
+        : "Available"
+    }`;
 
 
-  // ----------------------------------------------
-  // AMOUNT
-  // ----------------------------------------------
+  /* AMOUNT */
 
   $("amountToken").innerHTML =
-
-    sendType === "crypto"
-
-      ? `${cryptoIcon(sendAsset)} ${sendAsset}`
-
-      : `${paymentIcon(sendAsset)} ${sendAsset}`;
+    `${iconAsset(sendAsset)} ${sendAsset}`;
 
 
-  // ----------------------------------------------
-  // RECEIVE SUMMARY
-  // ----------------------------------------------
+  /* RECEIVE RESULT */
 
   $("receiveSmallIcon").innerHTML =
-
-    receiveType === "crypto"
-
-      ? cryptoIcon(receiveMethod)
-
-      : paymentIcon(receiveMethod);
-
+    iconMethod(receiveMethod);
 
   $("receiveCurrency").textContent =
-    receiveCurrency();
+    payment.currency || "USD";
 
 
-  if (receiveType === "crypto") {
-
-    $("receiveCurrencyName").textContent =
-      receive.name ||
-      receiveMethod;
-
-  } else {
-
-    const currency =
-      receive.currency || "USD";
-
-    const names = {
-
-      USD: "US Dollar",
-
-      EUR: "Euro",
-
-      CAD: "Canadian Dollar",
-
-      AUD: "Australian Dollar",
-
-      GBP: "British Pound"
-
-    };
-
-    $("receiveCurrencyName").textContent =
-      names[currency] ||
-      currency;
-  }
+  $("receiveCurrencyName").textContent =
+    currencyName(payment.currency);
 
 
   renderNetwork();
 
   update();
+
 }
 
 
-// ==================================================
-// PICKER ITEMS
-// ==================================================
+/* =========================================================
+   CURRENCY NAME
+   ========================================================= */
 
-function pickerItems(type) {
+function currencyName(cur) {
+
+  return {
+
+    USD: "US Dollar",
+
+    EUR: "Euro",
+
+    CAD: "Canadian Dollar",
+
+    AUD: "Australian Dollar",
+
+    GBP: "British Pound",
+
+    BRL: "Brazilian Real",
+
+    MXN: "Mexican Peso"
+
+  }[cur] || cur || "Currency";
+
+}
+
+
+/* =========================================================
+   PICKER ITEMS
+   ========================================================= */
+
+function items(type) {
 
   if (type === "crypto") {
 
-    return Object.entries(
-      cryptos()
-    ).map(([id, data]) => ({
+    return Object.entries(cryptos())
+      .map(([id, data]) => ({
+
+        id,
+
+        name: id,
+
+        sub: data.name || id,
+
+        icon: iconAsset(id)
+
+      }));
+
+  }
+
+
+  return Object.entries(payments())
+    .map(([id, data]) => ({
 
       id,
 
       name: id,
 
       sub:
-        data.name ||
-        id,
+        `${data.currency || ""} • ${
+          data.status === "request"
+            ? "By Request"
+            : "Available"
+        }`,
 
-      icon:
-        data.icon
-          ? `<img src="${data.icon}" alt="${id}" class="picker-logo">`
-          : id
+      icon: iconMethod(id)
 
     }));
 
-  }
-
-
-  return Object.entries(
-    payments()
-  ).map(([id, data]) => ({
-
-    id,
-
-    name: id,
-
-    sub:
-      `${data.currency || ""} • ` +
-      (
-        data.status === "request"
-          ? "By Request"
-          : "Available"
-      ),
-
-    icon:
-      data.icon
-        ? `<img src="${data.icon}" alt="${id}" class="picker-logo">`
-        : "◆"
-
-  }));
 }
 
 
-// ==================================================
-// OPEN PICKER
-// ==================================================
+/* =========================================================
+   OPEN PICKER
+   ========================================================= */
 
-function openPicker(side) {
+function openPicker(type) {
 
-  pickerType = side;
-
-  const type =
-    side === "send"
-      ? sendType
-      : receiveType;
+  pickerType = type;
 
 
   $("pickerTitle").textContent =
-
-    side === "send"
-
+    type === "crypto"
       ? "You Send From"
-
       : "You Receive To";
 
 
   $("pickerList").innerHTML = "";
 
 
-  // ------------------------------------------------
-  // TYPE SWITCH
-  // ------------------------------------------------
-
-  const switchBox =
-    document.createElement("div");
-
-  switchBox.className =
-    "picker-switch";
-
-
-  const cryptoButton =
-    document.createElement("button");
-
-  cryptoButton.textContent =
-    "CRYPTO";
-
-
-  const paymentButton =
-    document.createElement("button");
-
-  paymentButton.textContent =
-    "PAYMENT";
-
-
-  if (type === "crypto") {
-
-    cryptoButton.classList.add(
-      "active"
-    );
-
-  } else {
-
-    paymentButton.classList.add(
-      "active"
-    );
-  }
-
-
-  cryptoButton.onclick = () => {
-
-    if (side === "send") {
-
-      sendType = "crypto";
-
-    } else {
-
-      receiveType = "crypto";
-    }
-
-    openPicker(side);
-  };
-
-
-  paymentButton.onclick = () => {
-
-    if (side === "send") {
-
-      sendType = "payment";
-
-    } else {
-
-      receiveType = "payment";
-    }
-
-    openPicker(side);
-  };
-
-
-  switchBox.appendChild(
-    cryptoButton
-  );
-
-  switchBox.appendChild(
-    paymentButton
-  );
-
-
-  $("pickerList").appendChild(
-    switchBox
-  );
-
-
-  // ------------------------------------------------
-  // ITEMS
-  // ------------------------------------------------
-
-  pickerItems(type).forEach(item => {
+  items(type).forEach(item => {
 
     const button =
       document.createElement("button");
 
+    button.type = "button";
 
     button.className =
       "picker-item";
@@ -479,229 +315,219 @@ function openPicker(side) {
     button.innerHTML = `
 
       <span class="coin-icon">
-
         ${item.icon}
-
       </span>
 
       <span class="selector-text">
 
-        <b>${item.name}</b>
+        <b>
+          ${escapeHTML(item.name)}
+        </b>
 
-        <small>${item.sub}</small>
+        <small>
+          ${escapeHTML(item.sub)}
+        </small>
 
       </span>
 
-      <span>›</span>
+      <span>
+        ›
+      </span>
 
     `;
 
 
     button.onclick = () => {
 
-      if (side === "send") {
+      if (type === "crypto") {
 
-        sendAsset =
-          item.id;
+        sendAsset = item.id;
 
       } else {
 
-        receiveMethod =
-          item.id;
-      }
+        receiveMethod = item.id;
 
+      }
 
       closePicker();
 
       render();
+
     };
 
 
     $("pickerList")
       .appendChild(button);
+
   });
 
 
   $("picker")
     .classList
     .remove("hidden");
+
 }
 
 
-// ==================================================
-// CLOSE PICKER
-// ==================================================
+/* =========================================================
+   CLOSE PICKER
+   ========================================================= */
 
 function closePicker() {
 
   $("picker")
     .classList
     .add("hidden");
+
 }
 
 
-// ==================================================
-// SELECT BUTTONS
-// ==================================================
+/* =========================================================
+   SAFE HTML
+   ========================================================= */
 
-$("sendSelector").onclick = () => {
+function escapeHTML(value) {
 
-  openPicker("send");
-};
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+
+}
 
 
-$("receiveSelector").onclick = () => {
+/* =========================================================
+   SELECTORS
+   ========================================================= */
 
-  openPicker("receive");
-};
+$("sendSelector").onclick =
+  () => openPicker("crypto");
+
+
+$("receiveSelector").onclick =
+  () => openPicker("payment");
 
 
 $("closePicker").onclick =
   closePicker;
 
 
-// ==================================================
-// SWAP
-// ==================================================
+/* Close picker by tapping outside */
+
+$("picker").addEventListener(
+  "click",
+  event => {
+
+    if (
+      event.target === $("picker")
+    ) {
+      closePicker();
+    }
+
+  }
+);
+
+
+/* =========================================================
+   SWAP
+   ========================================================= */
 
 $("swapBtn").onclick = () => {
 
-  const oldSendType =
-    sendType;
-
-  const oldSendAsset =
+  const currentCrypto =
     sendAsset;
 
-
-  const oldReceiveType =
-    receiveType;
-
-  const oldReceiveMethod =
+  const currentPayment =
     receiveMethod;
 
 
-  sendType =
-    oldReceiveType;
+  /*
+    Current structure is:
+    Crypto → Payment
 
-  sendAsset =
-    oldReceiveMethod;
+    Swap is only possible when the
+    selected payment currency can be
+    represented as a configured crypto.
+  */
+
+  const matchingCrypto =
+    Object.keys(cryptos())
+      .find(
+        x =>
+          x.toUpperCase() ===
+          currentPayment.toUpperCase()
+      );
 
 
-  receiveType =
-    oldSendType;
+  const matchingPayment =
+    Object.entries(payments())
+      .find(
+        ([, data]) =>
+          String(data.currency || "")
+            .toUpperCase() ===
+          currentCrypto.toUpperCase()
+      );
 
-  receiveMethod =
-    oldSendAsset;
+
+  if (
+    matchingCrypto &&
+    matchingPayment
+  ) {
+
+    sendAsset =
+      matchingCrypto;
+
+    receiveMethod =
+      matchingPayment[0];
+
+  }
 
 
   render();
+
 };
 
 
-// ==================================================
-// MARKET RATE
-// ==================================================
+/* =========================================================
+   MARKET RATE
+   ========================================================= */
 
 function marketRate() {
 
-  const from =
-    sendCurrency();
+  const cur =
+    currency();
 
-  const to =
-    receiveCurrency();
-
-
-  // ----------------------------------------------
-  // USDT → USD
-  // ----------------------------------------------
 
   if (
-
-    sendType === "crypto" &&
-
     sendAsset === "USDT" &&
-
-    receiveType === "payment" &&
-
-    to === "USD"
-
+    cur === "USD"
   ) {
 
     return live.usd;
+
   }
 
 
-  // ----------------------------------------------
-  // USDT → EUR
-  // ----------------------------------------------
-
   if (
-
-    sendType === "crypto" &&
-
     sendAsset === "USDT" &&
-
-    receiveType === "payment" &&
-
-    to === "EUR"
-
+    cur === "EUR"
   ) {
 
     return live.eur;
-  }
 
-
-  // ----------------------------------------------
-  // USD → USDT
-  // ----------------------------------------------
-
-  if (
-
-    sendType === "payment" &&
-
-    from === "USD" &&
-
-    receiveType === "crypto" &&
-
-    receiveMethod === "USDT"
-
-  ) {
-
-    return live.usd
-      ? 1 / live.usd
-      : null;
-  }
-
-
-  // ----------------------------------------------
-  // EUR → USDT
-  // ----------------------------------------------
-
-  if (
-
-    sendType === "payment" &&
-
-    from === "EUR" &&
-
-    receiveType === "crypto" &&
-
-    receiveMethod === "USDT"
-
-  ) {
-
-    return live.eur
-      ? 1 / live.eur
-      : null;
   }
 
 
   return null;
+
 }
 
 
-// ==================================================
-// CALCULATE
-// ==================================================
+/* =========================================================
+   CALCULATE
+   ========================================================= */
 
 function calculate() {
 
@@ -721,30 +547,28 @@ function calculate() {
   ) {
 
     return null;
+
   }
 
 
   /*
-    INTERNAL FEE
+    Customer rate includes your fee.
 
-    Fee is NOT displayed.
+    Example:
 
-    The customer only sees
-    the final customer rate.
+    Market = 1.00 USD
+
+    Fee = 28%
+
+    Customer rate = 1.28 USD
   */
 
-  const internalFee =
-    fee();
-
-
-  const customerRate =
-    market *
-    (1 - internalFee);
+  const customer =
+    market * (1 + fee());
 
 
   const receive =
-    amount *
-    customerRate;
+    amount * customer;
 
 
   return {
@@ -753,25 +577,23 @@ function calculate() {
 
     market,
 
-    customerRate,
+    customer,
 
     receive
+
   };
+
 }
 
 
-// ==================================================
-// UPDATE DISPLAY
-// ==================================================
+/* =========================================================
+   UPDATE CALCULATION
+   ========================================================= */
 
 function update() {
 
   const result =
     calculate();
-
-
-  const currency =
-    receiveCurrency();
 
 
   if (!result) {
@@ -786,85 +608,56 @@ function update() {
       "—";
 
     return;
+
   }
 
 
   $("receive").textContent =
-
-    `${fmt(result.receive)} ${currency}`;
+    `${fmt(result.receive)} ${currency()}`;
 
 
   $("marketRate").textContent =
-
-    `1 ${sendCurrency()} ≈ ` +
-    `${fmt(result.market)} ${currency}`;
+    `1 ${sendAsset} ≈ ${
+      fmt(result.market)
+    } ${currency()}`;
 
 
   $("customerRate").textContent =
+    `1 ${sendAsset} ≈ ${
+      fmt(result.customer)
+    } ${currency()}`;
 
-    `1 ${sendCurrency()} ≈ ` +
-    `${fmt(result.customerRate)} ${currency}`;
 }
 
 
-// ==================================================
-// NETWORK
-// ==================================================
+/* =========================================================
+   NETWORK
+   ========================================================= */
 
 function renderNetwork() {
 
-  let networks = [];
-
-
-  if (
-
-    receiveType === "crypto" &&
-
-    cryptos()[receiveMethod]
-
-  ) {
-
-    networks =
-      cryptos()[receiveMethod]
-        .networks || [];
-
-  }
-
-
-  else if (
-
-    sendType === "crypto" &&
-
-    cryptos()[sendAsset]
-
-  ) {
-
-    networks =
-      cryptos()[sendAsset]
-        .networks || [];
-  }
+  const networks =
+    cryptos()[sendAsset]?.networks || [];
 
 
   $("network").innerHTML =
-
     (
       networks.length
         ? networks
         : ["Not applicable"]
     )
+      .map(
+        network =>
+          `<option>${escapeHTML(network)}</option>`
+      )
+      .join("");
 
-    .map(
-      network =>
-        `<option>${network}</option>`
-    )
-
-    .join("");
 }
 
 
-// ==================================================
-// LIVE USDT RATE
-// ==================================================
+/* =========================================================
+   LIVE RATE
+   ========================================================= */
 
 async function fetchLiveRate() {
 
@@ -876,13 +669,10 @@ async function fetchLiveRate() {
 
     const response =
       await fetch(
-
         "https://api.coinbase.com/v2/exchange-rates?currency=USDT",
-
         {
           cache: "no-store"
         }
-
       );
 
 
@@ -891,6 +681,7 @@ async function fetchLiveRate() {
       throw new Error(
         "Rate request failed"
       );
+
     }
 
 
@@ -900,13 +691,13 @@ async function fetchLiveRate() {
 
     const usd =
       Number(
-        data.data.rates.USD
+        data?.data?.rates?.USD
       );
 
 
     const eur =
       Number(
-        data.data.rates.EUR
+        data?.data?.rates?.EUR
       );
 
 
@@ -916,14 +707,16 @@ async function fetchLiveRate() {
     ) {
 
       throw new Error(
-        "Invalid rate"
+        "Invalid market rate"
       );
+
     }
 
 
-    live.usd = usd;
-
-    live.eur = eur;
+    live = {
+      usd,
+      eur
+    };
 
 
     $("rateStatus").textContent =
@@ -937,14 +730,7 @@ async function fetchLiveRate() {
 
     update();
 
-
   } catch (error) {
-
-    console.error(
-      "Live rate error:",
-      error
-    );
-
 
     $("rateStatus").textContent =
       "Live rate temporarily unavailable";
@@ -953,32 +739,31 @@ async function fetchLiveRate() {
     $("rateStatus")
       .classList
       .remove("ok");
+
   }
+
 }
 
 
-// ==================================================
-// ORDER ID
-// ==================================================
+/* =========================================================
+   ORDER ID
+   ========================================================= */
 
 function newOrder() {
 
   return (
     "EP247-" +
-    String(Date.now())
-      .slice(-6)
+    String(Date.now()).slice(-6)
   );
+
 }
 
 
-// ==================================================
-// DRAWER
-// ==================================================
+/* =========================================================
+   DRAWERS
+   ========================================================= */
 
-function showDrawer(
-  id,
-  show
-) {
+function showDrawer(id, show) {
 
   $(id)
     .classList
@@ -986,66 +771,13 @@ function showDrawer(
       "hidden",
       !show
     );
+
 }
 
 
-// ==================================================
-// PAYMENT DATA
-// ==================================================
-
-function paymentData() {
-
-  if (
-    receiveType === "payment"
-  ) {
-
-    return (
-      payments()[receiveMethod] ||
-      {}
-    );
-  }
-
-
-  if (
-    sendType === "payment"
-  ) {
-
-    return (
-      payments()[sendAsset] ||
-      {}
-    );
-  }
-
-
-  return {};
-}
-
-
-function paymentMethodName() {
-
-  if (
-    receiveType === "payment"
-  ) {
-
-    return receiveMethod;
-  }
-
-
-  if (
-    sendType === "payment"
-  ) {
-
-    return sendAsset;
-  }
-
-
-  return "Crypto";
-}
-
-
-// ==================================================
-// PAYMENT INFORMATION
-// ==================================================
+/* =========================================================
+   RENDER PAYMENT
+   ========================================================= */
 
 function renderPayment() {
 
@@ -1054,37 +786,25 @@ function renderPayment() {
 
 
   const payment =
-    paymentData();
+    methodData();
 
 
   if (!result) {
 
     alert(
-      "Live rate is not available yet."
+      "Live market rate is not available yet."
     );
 
     return false;
+
   }
 
 
-  // Crypto → Crypto
-  if (
+  /*
+    Payment methods marked "request"
+    go directly to support.
+  */
 
-    sendType === "crypto" &&
-
-    receiveType === "crypto"
-
-  ) {
-
-    alert(
-      "Crypto to Crypto payment information is not configured yet."
-    );
-
-    return false;
-  }
-
-
-  // Payment method requires support
   if (
     payment.status === "request"
   ) {
@@ -1095,6 +815,7 @@ function renderPayment() {
     );
 
     return false;
+
   }
 
 
@@ -1102,188 +823,222 @@ function renderPayment() {
     newOrder();
 
 
-  $("orderBadge")
-    .textContent =
+  $("orderBadge").textContent =
     orderId;
 
 
-  const method =
-    paymentMethodName();
+  $("paymentTitle").textContent =
+    `${payment.title || receiveMethod} Payment Details`;
 
 
-  $("paymentTitle")
-    .textContent =
-
-    `${payment.title || method} Payment Details`;
-
-
-  $("paymentInfo")
-    .innerHTML =
-
+  $("paymentInfo").innerHTML =
     (payment.fields || [])
-
       .map(
         ([key, value]) => `
 
           <div class="payment-row">
 
-            <span>${key}</span>
+            <span>
+              ${escapeHTML(key)}
+            </span>
 
-            <b>${value}</b>
+            <b>
+              ${escapeHTML(value)}
+            </b>
 
           </div>
 
         `
       )
-
       .join("");
 
 
-  $("paySummary")
-    .textContent =
+  /*
+    If a payment has no configured
+    fields, show support instead.
+  */
 
-    `${fmt(result.amount)} ${sendCurrency()}`;
+  if (
+    !(payment.fields || []).length
+  ) {
+
+    $("paymentInfo").innerHTML = `
+
+      <div class="payment-row">
+
+        <span>
+          Status
+        </span>
+
+        <b>
+          Contact Support
+        </b>
+
+      </div>
+
+    `;
+
+  }
 
 
-  $("receiveSummary")
-    .textContent =
-
-    `${fmt(result.receive)} ${receiveCurrency()}`;
+  $("paySummary").textContent =
+    `${fmt(result.amount)} ${sendAsset}`;
 
 
-  $("methodSummary")
-    .textContent =
-    method;
+  $("receiveSummary").textContent =
+    `${fmt(result.receive)} ${currency()}`;
 
 
-  $("rateSummary")
-    .textContent =
+  $("methodSummary").textContent =
+    receiveMethod;
 
-    `1 ${sendCurrency()} ≈ ` +
-    `${fmt(result.customerRate)} ` +
-    `${receiveCurrency()}`;
+
+  $("rateSummary").textContent =
+    `1 ${sendAsset} ≈ ${
+      fmt(result.customer)
+    } ${currency()}`;
 
 
   return true;
+
 }
 
 
-// ==================================================
-// PAYMENT TEXT
-// ==================================================
+/* =========================================================
+   PAYMENT TEXT
+   ========================================================= */
 
 function paymentText() {
 
   const payment =
-    paymentData();
-
-
-  const method =
-    paymentMethodName();
+    methodData();
 
 
   return (
+    payment.title ||
+    receiveMethod
+  )
+  +
+  "\n"
+  +
+  (payment.fields || [])
+    .map(
+      ([key, value]) =>
+        `${key}: ${value}`
+    )
+    .join("\n");
 
-    (payment.title || method) +
-
-    "\n" +
-
-    (payment.fields || [])
-
-      .map(
-        ([key, value]) =>
-          `${key}: ${value}`
-      )
-
-      .join("\n")
-  );
 }
 
 
-// ==================================================
-// AMOUNT
-// ==================================================
+/* =========================================================
+   AMOUNT EVENTS
+   ========================================================= */
 
 $("amount").oninput =
   update;
 
 
-// ==================================================
-// CONTINUE
-// ==================================================
+/* =========================================================
+   CONTINUE
+   ========================================================= */
 
-$("continueBtn").onclick =
-  () => {
+$("continueBtn").onclick = () => {
 
-    if (
-      renderPayment()
-    ) {
-
-      showDrawer(
-        "paymentStep",
-        true
-      );
-    }
-  };
-
-
-// ==================================================
-// BACK HOME
-// ==================================================
-
-$("backHome").onclick =
-  () => {
+  if (
+    renderPayment()
+  ) {
 
     showDrawer(
       "paymentStep",
-      false
-    );
-  };
-
-
-// ==================================================
-// I'VE PAID
-// ==================================================
-
-$("paidBtn").onclick =
-  () => {
-
-    showDrawer(
-      "paymentStep",
-      false
-    );
-
-
-    showDrawer(
-      "submitStep",
       true
     );
-  };
-
-
-// ==================================================
-// BACK PAYMENT
-// ==================================================
-
-$("backPayment").onclick =
-  () => {
 
     showDrawer(
       "submitStep",
       false
     );
 
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
 
-    showDrawer(
-      "paymentStep",
-      true
-    );
-  };
+  }
+
+};
 
 
-// ==================================================
-// COPY PAYMENT INFO
-// ==================================================
+/* =========================================================
+   BACK HOME
+   ========================================================= */
+
+$("backHome").onclick = () => {
+
+  showDrawer(
+    "paymentStep",
+    false
+  );
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+};
+
+
+/* =========================================================
+   PAID
+   ========================================================= */
+
+$("paidBtn").onclick = () => {
+
+  showDrawer(
+    "paymentStep",
+    false
+  );
+
+  showDrawer(
+    "submitStep",
+    true
+  );
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+};
+
+
+/* =========================================================
+   BACK PAYMENT
+   ========================================================= */
+
+$("backPayment").onclick = () => {
+
+  showDrawer(
+    "submitStep",
+    false
+  );
+
+  showDrawer(
+    "paymentStep",
+    true
+  );
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth"
+  });
+
+};
+
+
+/* =========================================================
+   COPY PAYMENT INFO
+   ========================================================= */
 
 $("copyInfo").onclick =
   async () => {
@@ -1299,178 +1054,172 @@ $("copyInfo").onclick =
         .writeText(text);
 
 
-      $("copyInfo")
-        .textContent =
+      $("copyInfo").textContent =
         "✓ COPIED";
 
 
-      setTimeout(() => {
+      setTimeout(
+        () => {
 
-        $("copyInfo")
-          .textContent =
-          "COPY PAYMENT INFO";
+          $("copyInfo").textContent =
+            "COPY PAYMENT INFO";
 
-      }, 1500);
+        },
+        1500
+      );
 
 
     } catch (error) {
 
       alert(text);
+
     }
+
   };
 
 
-// ==================================================
-// SUBMIT ORDER
-// ==================================================
+/* =========================================================
+   SUBMIT ORDER
+   ========================================================= */
 
-$("submitOrder").onclick =
-  () => {
+$("submitOrder").onclick = () => {
 
-    if (
-      !$("destination")
-        .value
-        .trim()
-    ) {
+  if (
+    !$("destination")
+      .value
+      .trim()
+  ) {
 
-      alert(
-        "Please enter your receiving information."
-      );
-
-      return;
-    }
-
-
-    if (
-      !$("telegram")
-        .value
-        .trim()
-    ) {
-
-      alert(
-        "Please enter your Telegram username."
-      );
-
-      return;
-    }
-
-
-    if (
-      !$("confirmCheck")
-        .checked
-    ) {
-
-      alert(
-        "Please confirm your information."
-      );
-
-      return;
-    }
-
-
-    $("successText")
-      .textContent =
-
-      `Order ${orderId} has been submitted. ` +
-      `Please send your successful payment screenshot ` +
-      `to our admin on Telegram with this Order ID.`;
-
-
-    $("success")
-      .classList
-      .remove("hidden");
-
-
-    $("submitOrder")
-      .classList
-      .add("hidden");
-  };
-
-
-// ==================================================
-// TELEGRAM ADMIN
-// ==================================================
-
-$("sendTelegram").onclick =
-  () => {
-
-    const telegram =
-      $("telegram")
-        .value
-        .trim();
-
-
-    const transaction =
-      $("txid")
-        .value
-        .trim() ||
-      "N/A";
-
-
-    const receiving =
-      $("destination")
-        .value
-        .trim();
-
-
-    const network =
-      $("network")
-        .value;
-
-
-    const text =
-
-`Payment screenshot for Order ${orderId}
-
-Telegram: ${telegram}
-
-Transaction ID: ${transaction}
-
-Receiving: ${receiving}
-
-Network: ${network}`;
-
-
-    window.open(
-
-      `https://t.me/${admin()}?text=` +
-      encodeURIComponent(text),
-
-      "_blank"
-
+    alert(
+      "Please enter your receiving information."
     );
-  };
+
+    return;
+
+  }
 
 
-// ==================================================
-// NEW ORDER
-// ==================================================
+  if (
+    !$("telegram")
+      .value
+      .trim()
+  ) {
+
+    alert(
+      "Please enter your Telegram username."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !$("confirmCheck").checked
+  ) {
+
+    alert(
+      "Please confirm your information."
+    );
+
+    return;
+
+  }
+
+
+  $("successText").textContent =
+    `Order ${orderId} has been submitted. Please send your successful payment screenshot to our admin on Telegram with this Order ID.`;
+
+
+  $("success")
+    .classList
+    .remove("hidden");
+
+
+  $("submitOrder")
+    .classList
+    .add("hidden");
+
+};
+
+
+/* =========================================================
+   SEND TELEGRAM
+   ========================================================= */
+
+$("sendTelegram").onclick = () => {
+
+  const telegram =
+    $("telegram")
+      .value
+      .trim();
+
+
+  const transaction =
+    $("txid")
+      .value
+      .trim() ||
+    "N/A";
+
+
+  const destination =
+    $("destination")
+      .value
+      .trim();
+
+
+  const network =
+    $("network")
+      .value;
+
+
+  const note =
+    $("note")
+      .value
+      .trim() ||
+    "N/A";
+
+
+  const text =
+    `Payment screenshot for Order ${orderId}\n` +
+    `Telegram: ${telegram}\n` +
+    `Transaction ID: ${transaction}\n` +
+    `Receiving: ${destination}\n` +
+    `Network: ${network}\n` +
+    `Note: ${note}`;
+
+
+  window.open(
+    `https://t.me/${admin()}?text=${encodeURIComponent(text)}`,
+    "_blank"
+  );
+
+};
+
+
+/* =========================================================
+   NEW ORDER
+   ========================================================= */
 
 $("newOrder").onclick =
   () => location.reload();
 
 
-// ==================================================
-// TELEGRAM LINKS
-// ==================================================
+/* =========================================================
+   SUPPORT LINKS
+   ========================================================= */
 
-if ($("supportNav")) {
-
-  $("supportNav").href =
-    `https://t.me/${support()}`;
-}
+$("supportNav").href =
+  `https://t.me/${support()}`;
 
 
-if ($("contactBtn")) {
-
-  $("contactBtn").href =
-    `https://t.me/${support()}`;
-}
+$("contactBtn").href =
+  `https://t.me/${support()}`;
 
 
-// ==================================================
-// INITIALIZE
-// ==================================================
+/* =========================================================
+   INITIALIZE
+   ========================================================= */
 
 render();
 
@@ -1478,12 +1227,8 @@ fetchLiveRate();
 
 
 setInterval(
-
   fetchLiveRate,
-
   Number(
-    settings().refreshMs ||
-    60000
+    settings().refreshMs || 60000
   )
-
 );

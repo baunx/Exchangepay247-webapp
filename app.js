@@ -256,14 +256,14 @@ function cryptoIcon(asset) {
 
   if (data.icon) {
 
-    return `
+    return  
       <img
         class="asset-logo"
         src="${escapeHTML(data.icon)}"
         alt="${escapeHTML(asset)}"
         onerror="this.style.display='none'"
       >
-    `;
+     ;
 
   }
 
@@ -279,14 +279,14 @@ function paymentIcon(method) {
 
   if (data.icon) {
 
-    return `
+    return  
       <img
         class="asset-logo"
         src="${escapeHTML(data.icon)}"
         alt="${escapeHTML(method)}"
         onerror="this.style.display='none'"
       >
-    `;
+     ;
 
   }
 
@@ -440,11 +440,11 @@ function renderSend() {
       sendAsset;
 
     $("sendSub").textContent =
-      `${data.currency || "USD"} • ${
+       ${data.currency || "USD"} • ${
         data.status === "request"
           ? "By Request"
           : "Available"
-      }`;
+      } ;
 
   }
 
@@ -452,7 +452,7 @@ function renderSend() {
   $("sendAmountToken")
     .textContent =
       sendType() === "crypto"
-        ? `${fallbackCryptoIcon(sendAsset)} ${sendAsset}`
+        ?  ${fallbackCryptoIcon(sendAsset)} ${sendAsset} 
         : data.currency || "USD";
 
 }
@@ -482,7 +482,7 @@ function renderReceive() {
 
     $("receiveAmountToken")
       .textContent =
-        `${fallbackCryptoIcon(receiveAsset)} ${receiveAsset}`;
+         ${fallbackCryptoIcon(receiveAsset)} ${receiveAsset} ;
 
   }
 
@@ -495,11 +495,11 @@ function renderReceive() {
       receiveAsset;
 
     $("receiveSub").textContent =
-      `${data.currency || "USD"} • ${
+       ${data.currency || "USD"} • ${
         data.status === "request"
           ? "By Request"
           : "Available"
-      }`;
+      } ;
 
     $("receiveAmountToken")
       .textContent =
@@ -537,11 +537,11 @@ function renderNetwork() {
       .classList
       .add("hidden");
 
-    network.innerHTML = `
+    network.innerHTML =  
       <option>
         Not applicable
       </option>
-    `;
+     ;
 
     return;
 
@@ -564,11 +564,11 @@ function renderNetwork() {
 
   if (!networks.length) {
 
-    network.innerHTML = `
+    network.innerHTML =  
       <option>
         Not applicable
       </option>
-    `;
+     ;
 
   }
 
@@ -576,11 +576,11 @@ function renderNetwork() {
 
     network.innerHTML =
       networks
-        .map(item => `
+        .map(item =>  
           <option value="${escapeHTML(item)}">
             ${escapeHTML(item)}
           </option>
-        `)
+         )
         .join("");
 
   }
@@ -995,12 +995,12 @@ function update() {
 
     $("marketRate")
       .textContent =
-        `1 ${crypto} ≈ ${fmt(market)} ${fiat}`;
+         1 ${crypto} ≈ ${fmt(market)} ${fiat} ;
 
 
     $("customerRate")
       .textContent =
-        `1 ${crypto} ≈ ${fmt(customer)} ${fiat}`;
+         1 ${crypto} ≈ ${fmt(customer)} ${fiat} ;
 
   }
 
@@ -1140,16 +1140,16 @@ function openPicker(side) {
         else {
 
           sub =
-            `${data.currency || ""} • ${
+             ${data.currency || ""} • ${
               data.status === "request"
                 ? "By Request"
                 : "Available"
-            }`;
+            } ;
 
         }
 
 
-        button.innerHTML = `
+        button.innerHTML =  
 
           <span class="coin-icon">
             ${icon}
@@ -1171,7 +1171,7 @@ function openPicker(side) {
             ›
           </span>
 
-        `;
+         ;
 
 
         button.onclick =
@@ -1414,7 +1414,7 @@ async function fetchLiveRate() {
 
       const response =
         await fetch(
-          `https://api.coinbase.com/v2/exchange-rates?currency=${encodeURIComponent(crypto)}`,
+           https://api.coinbase.com/v2/exchange-rates?currency=${encodeURIComponent(crypto)} ,
           {
             cache:
               "no-store"
@@ -1473,7 +1473,7 @@ async function fetchLiveRate() {
     catch (error) {
 
       console.warn(
-        `Rate failed for ${crypto}`,
+         Rate failed for ${crypto} ,
         error
       );
 
@@ -1660,7 +1660,7 @@ function renderPayment() {
     ) {
 
       window.open(
-        `https://t.me/${support()}`,
+         https://t.me/${support()} ,
         "_blank"
       );
 
@@ -1671,10 +1671,10 @@ function renderPayment() {
 
     $("paymentTitle")
       .textContent =
-        `${
+         ${
           payment.title ||
           sendAsset
-        } Payment Details`;
+        } Payment Details ;
 
 
     const fields =
@@ -1686,7 +1686,7 @@ function renderPayment() {
       .innerHTML =
         fields
           .map(
-            ([key, value]) => `
+            ([key, value]) =>  
 
               <div class="payment-row">
 
@@ -1700,7 +1700,7 @@ function renderPayment() {
 
               </div>
 
-            `
+             
           )
           .join("");
 
@@ -1708,7 +1708,7 @@ function renderPayment() {
     if (!fields.length) {
 
       $("paymentInfo")
-        .innerHTML = `
+        .innerHTML =  
 
           <div class="payment-row">
 
@@ -1722,7 +1722,7 @@ function renderPayment() {
 
           </div>
 
-        `;
+         ;
 
     }
 
@@ -1737,11 +1737,11 @@ function renderPayment() {
 
     $("paymentTitle")
       .textContent =
-        `Send ${sendAsset}`;
+         Send ${sendAsset} ;
 
 
     $("paymentInfo")
-      .innerHTML = `
+      .innerHTML =  
 
         <div class="payment-row">
 
@@ -1798,19 +1798,19 @@ function renderPayment() {
 
         </div>
 
-      `;
+       ;
 
   }
 
 
   $("paySummary")
     .textContent =
-      `${fmt(result.send)} ${sendCurrency()}`;
+       ${fmt(result.send)} ${sendCurrency()} ;
 
 
   $("receiveSummary")
     .textContent =
-      `${fmt(result.receive)} ${receiveCurrency()}`;
+       ${fmt(result.receive)} ${receiveCurrency()} ;
 
 
   $("methodSummary")
@@ -1843,44 +1843,44 @@ function paymentText() {
 
 
   lines.push(
-    `Order ID: ${orderId}`
+     Order ID: ${orderId} 
   );
 
 
   lines.push(
-    `Direction: ${
+     Direction: ${
       isCryptoToPayment()
         ? "Crypto → Payment"
         : "Payment → Crypto"
-    }`
+    } 
   );
 
 
   lines.push(
-    `Send: ${
+     Send: ${
       $("paySummary").textContent
-    }`
+    } 
   );
 
 
   lines.push(
-    `Receive: ${
+     Receive: ${
       $("receiveSummary").textContent
-    }`
+    } 
   );
 
 
   lines.push(
-    `Method: ${
+     Method: ${
       $("methodSummary").textContent
-    }`
+    } 
   );
 
 
   lines.push(
-    `Rate: ${
+     Rate: ${
       $("rateSummary").textContent
-    }`
+    } 
   );
 
 
@@ -1906,7 +1906,7 @@ function paymentText() {
         ([key, value]) => {
 
           lines.push(
-            `${key}: ${value}`
+             ${key}: ${value} 
           );
 
         }
@@ -2358,7 +2358,7 @@ $("submitOrder")
 
       $("successText")
         .textContent =
-          `Order ${orderId} has been submitted. Please send your successful payment screenshot to our admin on Telegram with this Order ID.`;
+           Order ${orderId} has been submitted. Please send your successful payment screenshot to our admin on Telegram with this Order ID. ;
 
 
       $("success")
@@ -2408,30 +2408,30 @@ $("sendTelegram")
 
 
       const text =
-        `Payment screenshot for Order ${orderId}\n` +
-        `Direction: ${
+         Payment screenshot for Order ${orderId}\n  +
+         Direction: ${
           isCryptoToPayment()
             ? "Crypto → Payment"
             : "Payment → Crypto"
-        }\n` +
-        `Send: ${
+        }\n  +
+         Send: ${
           $("paySummary").textContent
-        }\n` +
-        `Receive: ${
+        }\n  +
+         Receive: ${
           $("receiveSummary").textContent
-        }\n` +
-        `Method: ${
+        }\n  +
+         Method: ${
           $("methodSummary").textContent
-        }\n` +
-        `Telegram: ${
+        }\n  +
+         Telegram: ${
           $("telegram")
             .value
             .trim()
-        }\n` +
-        `Transaction ID: ${transaction}\n` +
-        `Receiving: ${destination}\n` +
-        `Network: ${network}\n` +
-        `Note: ${note}`;
+        }\n  +
+         Transaction ID: ${transaction}\n  +
+         Receiving: ${destination}\n  +
+         Network: ${network}\n  +
+         Note: ${note} ;
 
 
       const username =
@@ -2450,7 +2450,7 @@ $("sendTelegram")
 
 
       window.open(
-        `https://t.me/${username}?text=${encodeURIComponent(text)}`,
+         https://t.me/${username}?text=${encodeURIComponent(text)} ,
         "_blank"
       );
 
@@ -2479,12 +2479,12 @@ if (supportUsername) {
 
   $("supportNav")
     .href =
-      `https://t.me/${supportUsername}`;
+       https://t.me/${supportUsername} ;
 
 
   $("contactBtn")
     .href =
-      `https://t.me/${supportUsername}`;
+       https://t.me/${supportUsername} ;
 
 }
 

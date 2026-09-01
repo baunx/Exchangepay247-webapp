@@ -1,576 +1,1443 @@
 /* =========================================================
-   EXCHANGEPAY247 — APP.JS
-   =========================================================
-   SUPPORTED DIRECTIONS
+EXCHANGEPAY247 — APP.JS
 
-   1. Crypto  → Payment Method
-   2. Payment → Crypto
+SUPPORTED DIRECTIONS:
 
-   Example:
+1. Crypto → Payment
+2. Payment → Crypto
 
-   USDT → Bank US
-   BTC  → Zelle
-   ETH  → Bank EU
+RULE:
 
-   SWAP:
+You Send From determines the opposite side.
 
-   Bank US → USDT
-   Zelle   → BTC
-   Bank EU → ETH
+Crypto selected:
+SEND    = Crypto
+RECEIVE = Payment
 
-   ========================================================= */
+Payment selected:
+SEND    = Payment
+RECEIVE = Crypto
 
+BOTH AMOUNTS ARE EDITABLE.
 
-/* =========================================================
-   STATE
-   ========================================================= */
-
-let sendType = "crypto";
-let receiveType = "payment";
-
-let sendAsset = "USDT";
-let receiveAsset = "Bank US";
-
-let pickerType = "";
-
-let live = {};
-
-let orderId = "";
-
+LIVE RATES:
+USDT
+BTC
+ETH
++ other configured cryptos
+========================================================= */
 
 /* =========================================================
-   BASIC HELPERS
-   ========================================================= */
+STATE
+========================================================= */
 
-const $ = id =>
-  document.getElementById(id);
+let direction =
+"crypto-to-payment";
 
+let sendAsset =
+"USDT";
 
-const cfg = () =>
-  window.CONFIG || {};
+let receiveAsset =
+"Bank US";
 
+let pickerSide =
+"send";
 
-const settings = () =>
-  cfg().settings || {};
+let liveRates =
+{};
 
+let orderId =
+"";
 
-const payments = () =>
-  cfg().paymentMethods || {};
+/*
+Prevent input events from
+recursively updating each other.
+*/
 
-
-const cryptos = () =>
-  cfg().crypto || {};
-
-
-const admin = () =>
-  String(
-    settings().adminTelegram || ""
-  ).replace(/^@/, "");
-
-
-const support = () =>
-  String(
-    settings().supportTelegram ||
-    settings().adminTelegram ||
-    ""
-  ).replace(/^@/, "");
-
-
-const fee = () =>
-  Number(
-    settings().feePercent || 0
-  ) / 100;
-
-
-const fmt = value =>
-  Number(value).toLocaleString(
-    undefined,
-    {
-      maximumFractionDigits: 8
-    }
-  );
-
+let calculating =
+false;
 
 /* =========================================================
-   DIRECTION HELPERS
-   ========================================================= */
+HELPERS
+========================================================= */
+
+const $ =
+id =>
+document.getElementById(id);
+
+const cfg =
+() =>
+window.CONFIG || {};
+
+const settings =
+() =>
+cfg().settings || {};
+
+const cryptos =
+() =>
+cfg().crypto || {};
+
+const payments =
+() =>
+cfg().paymentMethods || {};
+
+const fee =
+() =>
+Number(
+settings().feePercent || 0
+) / 100;
+
+const admin =
+() =>
+String(
+settings().adminTelegram || ""
+).replace(/^@/, "");
+
+const support =
+() =>
+String(
+settings().supportTelegram ||
+settings().adminTelegram ||
+""
+).replace(/^@/, "");
+
+const fmt =
+value =>
+Number(value).toLocaleString(
+undefined,
+{
+maximumFractionDigits: 8
+}
+);
+
+/* =========================================================
+ESCAPE HTML
+========================================================= */
+
+function escapeHTML(
+value
+) {
+
+return String(value)
+.replace(
+/&/g,
+"&"
+)
+.replace(
+/</g,
+"<"
+)
+.replace(
+/>/g,
+">"
+)
+.replace(
+/"/g,
+"""
+)
+.replace(
+/'/g,
+"'"
+);
+
+}
+
+/* =========================================================
+DIRECTION
+========================================================= */
 
 function isCryptoToPayment() {
 
-  return (
-    sendType === "crypto" &&
-    receiveType === "payment"
-  );
+return (
+direction ===
+"crypto-to-payment"
+);
 
 }
-
 
 function isPaymentToCrypto() {
 
-  return (
-    sendType === "payment" &&
-    receiveType === "crypto"
-  );
+return (
+direction ===
+"payment-to-crypto"
+);
 
 }
-
 
 /* =========================================================
-   CURRENT CRYPTO DATA
-   ========================================================= */
+CURRENT TYPES
+========================================================= */
 
-function sendCryptoData() {
+function sendType() {
 
-  if (
-    sendType !== "crypto"
-  ) {
-
-    return {};
-
-  }
-
-
-  return (
-    cryptos()[sendAsset] ||
-    {}
-  );
+return isCryptoToPayment()
+? "crypto"
+: "payment";
 
 }
 
+function receiveType() {
 
-function receiveCryptoData() {
-
-  if (
-    receiveType !== "crypto"
-  ) {
-
-    return {};
-
-  }
-
-
-  return (
-    cryptos()[receiveAsset] ||
-    {}
-  );
+return isCryptoToPayment()
+? "payment"
+: "crypto";
 
 }
-
 
 /* =========================================================
-   CURRENT PAYMENT DATA
-   ========================================================= */
+DATA
+========================================================= */
 
-function sendPaymentData() {
+function sendData() {
 
-  if (
-    sendType !== "payment"
-  ) {
+if (
+sendType() ===
+"crypto"
+) {
 
-    return {};
-
-  }
-
-
-  return (
-    payments()[sendAsset] ||
-    {}
-  );
+```
+return (
+  cryptos()[sendAsset] ||
+  {}
+);
+```
 
 }
 
-
-function receivePaymentData() {
-
-  if (
-    receiveType !== "payment"
-  ) {
-
-    return {};
-
-  }
-
-
-  return (
-    payments()[receiveAsset] ||
-    {}
-  );
+return (
+payments()[sendAsset] ||
+{}
+);
 
 }
 
+function receiveData() {
+
+if (
+receiveType() ===
+"crypto"
+) {
+
+```
+return (
+  cryptos()[receiveAsset] ||
+  {}
+);
+```
+
+}
+
+return (
+payments()[receiveAsset] ||
+{}
+);
+
+}
 
 /* =========================================================
-   CURRENT FIAT CURRENCY
-   ========================================================= */
+CURRENCY
+========================================================= */
 
-function fiatCurrency() {
+function sendCurrency() {
 
-  if (
-    isCryptoToPayment()
-  ) {
+if (
+sendType() ===
+"crypto"
+) {
 
-    return (
-      receivePaymentData().currency ||
-      "USD"
+```
+return sendAsset;
+```
+
+}
+
+return (
+sendData().currency ||
+"USD"
+);
+
+}
+
+function receiveCurrency() {
+
+if (
+receiveType() ===
+"crypto"
+) {
+
+```
+return receiveAsset;
+```
+
+}
+
+return (
+receiveData().currency ||
+"USD"
+);
+
+}
+
+/* =========================================================
+ICONS
+========================================================= */
+
+function fallbackCryptoIcon(
+asset
+) {
+
+return {
+
+```
+USDT: "₮",
+BTC: "₿",
+ETH: "Ξ",
+USDC: "$",
+SOL: "◎"
+```
+
+}[asset] || "◆";
+
+}
+
+function fallbackPaymentIcon(
+method
+) {
+
+return {
+
+```
+"Bank US": "🏦",
+"Bank EU": "🏦",
+"Bank Canada": "🏦",
+"Bank Australia": "🏦",
+
+Zelle: "Z",
+Venmo: "V",
+"Cash App": "$",
+PayPal: "P",
+Wise: "W"
+```
+
+}[method] || "◆";
+
+}
+
+function cryptoIcon(
+asset
+) {
+
+const data =
+cryptos()[asset] ||
+{};
+
+if (
+data.icon
+) {
+
+```
+return `
+  <img
+    class="asset-logo"
+    src="${escapeHTML(data.icon)}"
+    alt="${escapeHTML(asset)}"
+    onerror="this.style.display='none'"
+  >
+`;
+```
+
+}
+
+return fallbackCryptoIcon(
+asset
+);
+
+}
+
+function paymentIcon(
+method
+) {
+
+const data =
+payments()[method] ||
+{};
+
+if (
+data.icon
+) {
+
+```
+return `
+  <img
+    class="asset-logo"
+    src="${escapeHTML(data.icon)}"
+    alt="${escapeHTML(method)}"
+    onerror="this.style.display='none'"
+  >
+`;
+```
+
+}
+
+return fallbackPaymentIcon(
+method
+);
+
+}
+
+/* =========================================================
+ENSURE ASSETS
+========================================================= */
+
+function ensureAssets() {
+
+const cryptoKeys =
+Object.keys(
+cryptos()
+);
+
+const paymentKeys =
+Object.keys(
+payments()
+);
+
+/*
+CRYPTO → PAYMENT
+*/
+
+if (
+isCryptoToPayment()
+) {
+
+```
+if (
+  !cryptos()[sendAsset]
+) {
+
+  sendAsset =
+    cryptoKeys[0] ||
+    "USDT";
+
+}
+
+
+if (
+  !payments()[receiveAsset]
+) {
+
+  receiveAsset =
+    paymentKeys[0] ||
+    "Bank US";
+
+}
+```
+
+}
+
+/*
+PAYMENT → CRYPTO
+*/
+
+else {
+
+```
+if (
+  !payments()[sendAsset]
+) {
+
+  sendAsset =
+    paymentKeys[0] ||
+    "Bank US";
+
+}
+
+
+if (
+  !cryptos()[receiveAsset]
+) {
+
+  receiveAsset =
+    cryptoKeys[0] ||
+    "USDT";
+
+}
+```
+
+}
+
+}
+
+/* =========================================================
+SET DIRECTION
+========================================================= */
+
+function setDirection(
+newDirection
+) {
+
+if (
+newDirection !==
+"crypto-to-payment" &&
+newDirection !==
+"payment-to-crypto"
+) {
+
+```
+return;
+```
+
+}
+
+direction =
+newDirection;
+
+ensureAssets();
+
+updateDirectionButtons();
+
+render();
+
+}
+
+/* =========================================================
+SEND TYPE BUTTONS
+========================================================= */
+
+function updateDirectionButtons() {
+
+$("sendCryptoBtn")
+.classList
+.toggle(
+"active",
+isCryptoToPayment()
+);
+
+$("sendPaymentBtn")
+.classList
+.toggle(
+"active",
+isPaymentToCrypto()
+);
+
+$("receiveTypeLabel")
+.textContent =
+isCryptoToPayment()
+? "Payment"
+: "Crypto";
+
+}
+
+/* =========================================================
+RENDER SEND
+========================================================= */
+
+function renderSend() {
+
+const data =
+sendData();
+
+if (
+sendType() ===
+"crypto"
+) {
+
+```
+$("sendIcon").innerHTML =
+  cryptoIcon(
+    sendAsset
+  );
+
+
+$("sendName").textContent =
+  sendAsset;
+
+
+$("sendSub").textContent =
+  data.name ||
+  sendAsset;
+```
+
+} else {
+
+```
+$("sendIcon").innerHTML =
+  paymentIcon(
+    sendAsset
+  );
+
+
+$("sendName").textContent =
+  sendAsset;
+
+
+$("sendSub").textContent =
+  `${data.currency || "USD"} • ${
+    data.status === "request"
+      ? "By Request"
+      : "Available"
+  }`;
+```
+
+}
+
+$("sendAmountToken")
+.textContent =
+sendType() === "crypto"
+? `${fallbackCryptoIcon(sendAsset)} ${sendAsset}`
+: data.currency || "USD";
+
+}
+
+/* =========================================================
+RENDER RECEIVE
+========================================================= */
+
+function renderReceive() {
+
+const data =
+receiveData();
+
+if (
+receiveType() ===
+"crypto"
+) {
+
+```
+$("receiveIcon").innerHTML =
+  cryptoIcon(
+    receiveAsset
+  );
+
+
+$("receiveName").textContent =
+  receiveAsset;
+
+
+$("receiveSub").textContent =
+  data.name ||
+  receiveAsset;
+
+
+$("receiveAmountToken")
+  .textContent =
+    `${fallbackCryptoIcon(receiveAsset)} ${receiveAsset}`;
+```
+
+} else {
+
+```
+$("receiveIcon").innerHTML =
+  paymentIcon(
+    receiveAsset
+  );
+
+
+$("receiveName").textContent =
+  receiveAsset;
+
+
+$("receiveSub").textContent =
+  `${data.currency || "USD"} • ${
+    data.status === "request"
+      ? "By Request"
+      : "Available"
+  }`;
+
+
+$("receiveAmountToken")
+  .textContent =
+    data.currency ||
+    "USD";
+```
+
+}
+
+}
+
+/* =========================================================
+NETWORK
+========================================================= */
+
+function renderNetwork() {
+
+const network =
+$("network");
+
+const networkField =
+$("networkField");
+
+const preview =
+$("networkPreview");
+
+if (
+receiveType() !==
+"crypto"
+) {
+
+```
+networkField
+  .classList
+  .add("hidden");
+
+
+preview
+  .classList
+  .add("hidden");
+
+
+network.innerHTML = `
+  <option>
+    Not applicable
+  </option>
+`;
+
+
+return;
+```
+
+}
+
+networkField
+.classList
+.remove("hidden");
+
+const data =
+cryptos()[receiveAsset] ||
+{};
+
+const networks =
+data.networks ||
+[];
+
+if (
+networks.length === 0
+) {
+
+```
+network.innerHTML = `
+  <option>
+    Not applicable
+  </option>
+`;
+```
+
+} else {
+
+```
+network.innerHTML =
+  networks
+    .map(
+      item => `
+        <option value="${escapeHTML(item)}">
+          ${escapeHTML(item)}
+        </option>
+      `
+    )
+    .join("");
+```
+
+}
+
+updateNetworkPreview();
+
+}
+
+function updateNetworkPreview() {
+
+const preview =
+$("networkPreview");
+
+const value =
+$("network").value;
+
+if (
+receiveType() ===
+"crypto" &&
+value &&
+value !==
+"Not applicable"
+) {
+
+```
+preview
+  .classList
+  .remove("hidden");
+
+
+$("networkPreviewValue")
+  .textContent =
+    value;
+```
+
+} else {
+
+```
+preview
+  .classList
+  .add("hidden");
+```
+
+}
+
+}
+
+/* =========================================================
+MARKET RATE
+========================================================= */
+
+function marketRate() {
+
+/*
+Crypto → Payment
+
+```
+crypto = sendAsset
+fiat = receive payment currency
+```
+
+*/
+
+if (
+isCryptoToPayment()
+) {
+
+```
+const crypto =
+  sendAsset;
+
+
+const fiat =
+  receiveData().currency ||
+  "USD";
+
+
+return Number(
+  liveRates?.[crypto]?.[fiat]
+) || null;
+```
+
+}
+
+/*
+Payment → Crypto
+
+```
+crypto = receiveAsset
+fiat = send payment currency
+```
+
+*/
+
+const crypto =
+receiveAsset;
+
+const fiat =
+sendData().currency ||
+"USD";
+
+return Number(
+liveRates?.[crypto]?.[fiat]
+) || null;
+
+}
+
+/* =========================================================
+CUSTOMER RATE
+========================================================= */
+
+function customerRate() {
+
+const market =
+marketRate();
+
+if (
+!(market > 0)
+) {
+
+```
+return null;
+```
+
+}
+
+return (
+market *
+(1 + fee())
+);
+
+}
+
+/* =========================================================
+CALCULATE FROM SEND
+========================================================= */
+
+function calculateFromSend(
+amount
+) {
+
+const rate =
+customerRate();
+
+if (
+!(rate > 0) ||
+!(amount > 0)
+) {
+
+```
+return null;
+```
+
+}
+
+/*
+Crypto → Payment
+
+```
+100 USDT × 1.28
+= 128 USD
+```
+
+*/
+
+if (
+isCryptoToPayment()
+) {
+
+```
+return {
+
+  send: amount,
+
+  receive:
+    amount * rate,
+
+  rate
+
+};
+```
+
+}
+
+/*
+Payment → Crypto
+
+```
+128 USD / 1.28
+= 100 USDT
+```
+
+*/
+
+return {
+
+```
+send: amount,
+
+receive:
+  amount / rate,
+
+rate
+```
+
+};
+
+}
+
+/* =========================================================
+CALCULATE FROM RECEIVE
+========================================================= */
+
+function calculateFromReceive(
+amount
+) {
+
+const rate =
+customerRate();
+
+if (
+!(rate > 0) ||
+!(amount > 0)
+) {
+
+```
+return null;
+```
+
+}
+
+/*
+Crypto → Payment
+
+```
+128 USD / 1.28
+= 100 USDT
+```
+
+*/
+
+if (
+isCryptoToPayment()
+) {
+
+```
+return {
+
+  send:
+    amount / rate,
+
+  receive:
+    amount,
+
+  rate
+
+};
+```
+
+}
+
+/*
+Payment → Crypto
+
+```
+100 USDT × 1.28
+= 128 USD
+```
+
+*/
+
+return {
+
+```
+send:
+  amount * rate,
+
+receive:
+  amount,
+
+rate
+```
+
+};
+
+}
+
+/* =========================================================
+UPDATE CALCULATION
+========================================================= */
+
+function update() {
+
+if (
+calculating
+) {
+
+```
+return;
+```
+
+}
+
+calculating =
+true;
+
+try {
+
+```
+const sendInput =
+  Number(
+    $("sendAmount").value ||
+    0
+  );
+
+
+const receiveInput =
+  Number(
+    $("receiveAmount").value ||
+    0
+  );
+
+
+/*
+  SEND INPUT ACTIVE
+*/
+
+if (
+  document.activeElement ===
+  $("sendAmount")
+) {
+
+  const result =
+    calculateFromSend(
+      sendInput
     );
 
-  }
-
 
   if (
-    isPaymentToCrypto()
+    result
   ) {
 
-    return (
-      sendPaymentData().currency ||
-      "USD"
+    $("receiveAmount").value =
+      cleanNumber(
+        result.receive
+      );
+
+  }
+
+}
+
+
+/*
+  RECEIVE INPUT ACTIVE
+*/
+
+else if (
+  document.activeElement ===
+  $("receiveAmount")
+) {
+
+  const result =
+    calculateFromReceive(
+      receiveInput
     );
 
+
+  if (
+    result
+  ) {
+
+    $("sendAmount").value =
+      cleanNumber(
+        result.send
+      );
+
   }
 
-
-  return "USD";
-
 }
 
 
-/* =========================================================
-   CURRENCY NAME
-   ========================================================= */
+/*
+  No input focused.
+  Use SEND as source.
+*/
 
-function currencyName(cur) {
+else if (
+  sendInput > 0
+) {
 
-  return {
-
-    USD: "US Dollar",
-    EUR: "Euro",
-    CAD: "Canadian Dollar",
-    AUD: "Australian Dollar",
-    GBP: "British Pound",
-    BRL: "Brazilian Real",
-    MXN: "Mexican Peso"
-
-  }[cur] || cur || "Currency";
-
-}
-
-
-/* =========================================================
-   CRYPTO ICON
-   ========================================================= */
-
-function iconAsset(asset) {
-
-  const data =
-    cryptos()[asset] || {};
+  const result =
+    calculateFromSend(
+      sendInput
+    );
 
 
   if (
-    data.icon
+    result
   ) {
 
-    return `
-      <img
-        class="asset-logo"
-        src="${escapeAttribute(data.icon)}"
-        alt="${escapeAttribute(asset)}"
-        onerror="
-          this.style.display='none';
-          this.parentElement.innerText='${fallbackAssetIcon(asset)}'
-        "
-      >
-    `;
+    $("receiveAmount").value =
+      cleanNumber(
+        result.receive
+      );
 
   }
 
+}
 
-  return fallbackAssetIcon(asset);
+
+const market =
+  marketRate();
+
+
+const customer =
+  customerRate();
+
+
+if (
+  !(market > 0) ||
+  !(customer > 0)
+) {
+
+  $("marketRate")
+    .textContent =
+      "—";
+
+
+  $("customerRate")
+    .textContent =
+      "—";
+
+
+  return;
 
 }
 
 
-/* =========================================================
-   PAYMENT ICON
-   ========================================================= */
+/*
+  Always display rate
+  in the natural direction:
 
-function iconMethod(method) {
+  Crypto → Fiat
 
-  const data =
-    payments()[method] || {};
+  Example:
+  1 BTC ≈ 100,000 USD
+*/
 
-
-  if (
-    data.icon
-  ) {
-
-    return `
-      <img
-        class="asset-logo"
-        src="${escapeAttribute(data.icon)}"
-        alt="${escapeAttribute(method)}"
-        onerror="
-          this.style.display='none';
-          this.parentElement.innerText='${fallbackMethodIcon(method)}'
-        "
-      >
-    `;
-
-  }
+let crypto;
+let fiat;
 
 
-  return fallbackMethodIcon(method);
+if (
+  isCryptoToPayment()
+) {
 
-}
+  crypto =
+    sendAsset;
 
 
-/* =========================================================
-   FALLBACK CRYPTO ICONS
-   ========================================================= */
+  fiat =
+    receiveData().currency ||
+    "USD";
 
-function fallbackAssetIcon(asset) {
+} else {
 
-  return {
+  crypto =
+    receiveAsset;
 
-    USDT: "₮",
-    BTC: "₿",
-    ETH: "Ξ",
-    USDC: "$",
-    SOL: "◎"
 
-  }[asset] || "◆";
+  fiat =
+    sendData().currency ||
+    "USD";
 
 }
 
 
-/* =========================================================
-   FALLBACK PAYMENT ICONS
-   ========================================================= */
+$("marketRate")
+  .textContent =
+    `1 ${crypto} ≈ ${fmt(market)} ${fiat}`;
 
-function fallbackMethodIcon(method) {
 
-  return {
+$("customerRate")
+  .textContent =
+    `1 ${crypto} ≈ ${fmt(customer)} ${fiat}`;
+```
 
-    "Bank US": "🏦",
-    "Bank EU": "🏦",
-    "Bank Canada": "🏦",
-    "Bank Australia": "🏦",
+} finally {
 
-    Zelle: "Z",
-    Venmo: "V",
-    "Cash App": "$",
-    PayPal: "P",
-    Wise: "W",
-    "E-Wallet": "◆"
-
-  }[method] || "◆";
+```
+calculating =
+  false;
+```
 
 }
 
+}
 
 /* =========================================================
-   SAFE HTML
-   ========================================================= */
+CLEAN NUMBER
+========================================================= */
 
-function escapeHTML(value) {
+function cleanNumber(
+value
+) {
 
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+if (
+!Number.isFinite(
+Number(value)
+)
+) {
+
+```
+return "";
+```
 
 }
 
-
-/* =========================================================
-   SAFE ATTRIBUTE
-   ========================================================= */
-
-function escapeAttribute(value) {
-
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/"/g, "&quot;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
+return Number(
+value.toFixed(8)
+);
 
 }
 
+/* =========================================================
+RENDER
+========================================================= */
+
+function render() {
+
+ensureAssets();
+
+updateDirectionButtons();
+
+renderSend();
+
+renderReceive();
+
+renderNetwork();
+
+renderDestination();
+
+update();
+
+}
 
 /* =========================================================
-   PICKER ITEMS
-   ========================================================= */
+DESTINATION
+========================================================= */
 
-function items(type) {
+function renderDestination() {
+
+if (
+isPaymentToCrypto()
+) {
+
+```
+$("destinationLabel")
+  .textContent =
+    "Receiving Crypto Address";
+
+
+$("destination")
+  .placeholder =
+    "Enter your crypto wallet address";
+```
+
+} else {
+
+```
+$("destinationLabel")
+  .textContent =
+    "Receiving Payment Account";
+
+
+$("destination")
+  .placeholder =
+    "Enter your receiving account / email";
+```
+
+}
+
+}
+
+/* =========================================================
+PICKER
+========================================================= */
+
+function openPicker(
+side
+) {
+
+pickerSide =
+side;
+
+$("pickerTitle")
+.textContent =
+side === "send"
+? "You Send From"
+: "You Receive To";
+
+$("pickerList")
+.innerHTML =
+"";
+
+const type =
+side === "send"
+? sendType()
+: receiveType();
+
+const source =
+type === "crypto"
+? cryptos()
+: payments();
+
+Object.entries(
+source
+)
+.forEach(
+([id, data]) => {
+
+```
+  const button =
+    document.createElement(
+      "button"
+    );
+
+
+  button.type =
+    "button";
+
+
+  button.className =
+    "picker-item";
+
+
+  const icon =
+    type === "crypto"
+      ? cryptoIcon(id)
+      : paymentIcon(id);
+
+
+  let sub;
+
 
   if (
     type === "crypto"
   ) {
 
-    return Object.entries(
-      cryptos()
-    ).map(
-      ([id, data]) => ({
+    sub =
+      data.name ||
+      id;
 
-        id,
+  } else {
 
-        name: id,
-
-        sub:
-          data.name || id,
-
-        icon:
-          iconAsset(id)
-
-      })
-    );
+    sub =
+      `${data.currency || ""} • ${
+        data.status === "request"
+          ? "By Request"
+          : "Available"
+      }`;
 
   }
 
 
-  if (
-    type === "payment"
-  ) {
+  button.innerHTML = `
 
-    return Object.entries(
-      payments()
-    ).map(
-      ([id, data]) => ({
+    <span class="coin-icon">
+      ${icon}
+    </span>
 
-        id,
+    <span class="selector-text">
 
-        name: id,
+      <b>
+        ${escapeHTML(id)}
+      </b>
 
-        sub:
-          `${data.currency || ""} • ${
-            data.status === "request"
-              ? "By Request"
-              : "Available"
-          }`,
+      <small>
+        ${escapeHTML(sub)}
+      </small>
 
-        icon:
-          iconMethod(id)
+    </span>
 
-      })
-    );
+    <span>
+      ›
+    </span>
 
-  }
+  `;
 
 
-  return [];
-
-}
-
-
-/* =========================================================
-   OPEN PICKER
-   ========================================================= */
-
-function openPicker(side) {
-
-  pickerType = side;
-
-
-  const type =
-    side === "send"
-      ? sendType
-      : receiveType;
-
-
-  $("pickerTitle").textContent =
-    side === "send"
-      ? "You Send From"
-      : "You Receive To";
-
-
-  $("pickerList").innerHTML =
-    "";
-
-
-  const list =
-    items(type);
-
-
-  if (
-    !list.length
-  ) {
-
-    $("pickerList").innerHTML = `
-
-      <div class="picker-item">
-
-        <span class="selector-text">
-
-          <b>
-            No options available
-          </b>
-
-          <small>
-            Please contact support.
-          </small>
-
-        </span>
-
-      </div>
-
-    `;
-
-  }
-
-
-  list.forEach(item => {
-
-    const button =
-      document.createElement("button");
-
-
-    button.type =
-      "button";
-
-
-    button.className =
-      "picker-item";
-
-
-    button.innerHTML = `
-
-      <span class="coin-icon">
-        ${item.icon}
-      </span>
-
-      <span class="selector-text">
-
-        <b>
-          ${escapeHTML(item.name)}
-        </b>
-
-        <small>
-          ${escapeHTML(item.sub)}
-        </small>
-
-      </span>
-
-      <span>
-        ›
-      </span>
-
-    `;
-
-
-    button.onclick = () => {
+  button.onclick =
+    () => {
 
       if (
         side === "send"
       ) {
 
         sendAsset =
-          item.id;
+          id;
 
       } else {
 
         receiveAsset =
-          item.id;
+          id;
 
       }
 
@@ -582,963 +1449,460 @@ function openPicker(side) {
     };
 
 
-    $("pickerList")
-      .appendChild(button);
+  $("pickerList")
+    .appendChild(
+      button
+    );
 
-  });
+}
+```
 
+);
 
-  $("picker")
-    .classList
-    .remove("hidden");
+$("picker")
+.classList
+.remove("hidden");
 
 }
 
-
 /* =========================================================
-   CLOSE PICKER
-   ========================================================= */
+CLOSE PICKER
+========================================================= */
 
 function closePicker() {
 
-  $("picker")
-    .classList
-    .add("hidden");
+$("picker")
+.classList
+.add("hidden");
 
 }
 
-
 /* =========================================================
-   RENDER SEND SIDE
-   ========================================================= */
+SWAP
+========================================================= */
 
-function renderSend() {
+function swap() {
 
-  if (
-    sendType === "crypto"
-  ) {
+/*
+Swap current assets.
 
-    const data =
-      sendCryptoData();
+```
+Crypto → Payment
+      becomes
+Payment → Crypto
+```
 
+*/
 
-    $("sendIcon").innerHTML =
-      iconAsset(sendAsset);
+const oldSend =
+sendAsset;
 
+const oldReceive =
+receiveAsset;
 
-    $("sendName").textContent =
-      sendAsset;
+sendAsset =
+oldReceive;
 
+receiveAsset =
+oldSend;
 
-    $("sendSub").textContent =
-      data.name ||
-      sendAsset;
+/*
+Change direction.
+*/
 
+if (
+isCryptoToPayment()
+) {
 
-    $("amountToken").innerHTML =
-      `${iconAsset(sendAsset)} ${sendAsset}`;
+```
+direction =
+  "payment-to-crypto";
+```
 
-    return;
+} else {
 
-  }
-
-
-  if (
-    sendType === "payment"
-  ) {
-
-    const data =
-      sendPaymentData();
-
-
-    $("sendIcon").innerHTML =
-      iconMethod(sendAsset);
-
-
-    $("sendName").textContent =
-      sendAsset;
-
-
-    $("sendSub").textContent =
-      `${data.currency || "USD"} • ${
-        data.status === "request"
-          ? "By Request"
-          : "Available"
-      }`;
-
-
-    $("amountToken").textContent =
-      data.currency ||
-      "USD";
-
-  }
+```
+direction =
+  "crypto-to-payment";
+```
 
 }
 
+/*
+Swap amounts.
+*/
 
-/* =========================================================
-   RENDER RECEIVE SIDE
-   ========================================================= */
+const oldSendAmount =
+$("sendAmount").value;
 
-function renderReceive() {
+$("sendAmount").value =
+$("receiveAmount").value;
 
-  if (
-    receiveType === "crypto"
-  ) {
+$("receiveAmount").value =
+oldSendAmount;
 
-    const data =
-      receiveCryptoData();
+ensureAssets();
 
-
-    $("receiveIcon").innerHTML =
-      iconAsset(receiveAsset);
-
-
-    $("receiveName").textContent =
-      receiveAsset;
-
-
-    $("receiveSub").textContent =
-      data.name ||
-      receiveAsset;
-
-
-    $("receiveSmallIcon").innerHTML =
-      iconAsset(receiveAsset);
-
-
-    $("receiveCurrency").textContent =
-      receiveAsset;
-
-
-    $("receiveCurrencyName").textContent =
-      data.name ||
-      receiveAsset;
-
-
-    return;
-
-  }
-
-
-  if (
-    receiveType === "payment"
-  ) {
-
-    const data =
-      receivePaymentData();
-
-
-    $("receiveIcon").innerHTML =
-      iconMethod(receiveAsset);
-
-
-    $("receiveName").textContent =
-      receiveAsset;
-
-
-    $("receiveSub").textContent =
-      `${data.currency || "USD"} • ${
-        data.status === "request"
-          ? "By Request"
-          : "Available"
-      }`;
-
-
-    $("receiveSmallIcon").innerHTML =
-      iconMethod(receiveAsset);
-
-
-    $("receiveCurrency").textContent =
-      data.currency ||
-      "USD";
-
-
-    $("receiveCurrencyName").textContent =
-      currencyName(
-        data.currency
-      );
-
-  }
+render();
 
 }
 
-
 /* =========================================================
-   RENDER NETWORK
-   ========================================================= */
-
-function renderNetwork() {
-
-  const network =
-    $("network");
-
-
-  if (!network) {
-    return;
-  }
-
-
-  /*
-    Network is required only when
-    receiving crypto.
-  */
-
-  if (
-    !isPaymentToCrypto()
-  ) {
-
-    network.innerHTML = `
-      <option>
-        Not applicable
-      </option>
-    `;
-
-    network.disabled =
-      true;
-
-    return;
-
-  }
-
-
-  network.disabled =
-    false;
-
-
-  const networks =
-    receiveCryptoData().networks ||
-    [];
-
-
-  if (
-    !networks.length
-  ) {
-
-    network.innerHTML = `
-      <option>
-        Not applicable
-      </option>
-    `;
-
-    return;
-
-  }
-
-
-  network.innerHTML =
-    networks
-      .map(
-        item =>
-          `<option value="${escapeAttribute(item)}">
-            ${escapeHTML(item)}
-          </option>`
-      )
-      .join("");
-
-}
-
-
-/* =========================================================
-   RENDER DESTINATION
-   ========================================================= */
-
-function renderDestination() {
-
-  if (
-    isCryptoToPayment()
-  ) {
-
-    $("destinationLabel").textContent =
-      "Receiving Payment Account";
-
-
-    $("destination").placeholder =
-      "Enter your receiving account / email";
-
-
-    return;
-
-  }
-
-
-  if (
-    isPaymentToCrypto()
-  ) {
-
-    $("destinationLabel").textContent =
-      "Receiving Crypto Address";
-
-
-    $("destination").placeholder =
-      "Enter your crypto wallet address";
-
-
-    return;
-
-  }
-
-}
-
-
-/* =========================================================
-   MAIN RENDER
-   ========================================================= */
-
-function render() {
-
-  renderSend();
-
-  renderReceive();
-
-  renderNetwork();
-
-  renderDestination();
-
-  update();
-
-}
-
-
-/* =========================================================
-   SWAP
-   ========================================================= */
-
-$("swapBtn").onclick = () => {
-
-  /*
-    Save current values.
-  */
-
-  const oldSendType =
-    sendType;
-
-
-  const oldSendAsset =
-    sendAsset;
-
-
-  const oldReceiveType =
-    receiveType;
-
-
-  const oldReceiveAsset =
-    receiveAsset;
-
-
-  /*
-    Swap types.
-  */
-
-  sendType =
-    oldReceiveType;
-
-
-  receiveType =
-    oldSendType;
-
-
-  /*
-    Swap selected assets.
-  */
-
-  sendAsset =
-    oldReceiveAsset;
-
-
-  receiveAsset =
-    oldSendAsset;
-
-
-  /*
-    Render everything again.
-  */
-
-  render();
-
-};
-
-
-/* =========================================================
-   MARKET RATE
-   ========================================================= */
-
-function marketRate() {
-
-  let crypto = null;
-
-  let fiat = null;
-
-
-  /*
-    Crypto → Payment
-
-    Example:
-
-    USDT → Bank US
-
-    Market rate:
-
-    1 USDT = X USD
-  */
-
-  if (
-    isCryptoToPayment()
-  ) {
-
-    crypto =
-      sendAsset;
-
-
-    fiat =
-      fiatCurrency();
-
-  }
-
-
-  /*
-    Payment → Crypto
-
-    Example:
-
-    Bank US → USDT
-
-    Market rate is still:
-
-    1 USDT = X USD
-  */
-
-  if (
-    isPaymentToCrypto()
-  ) {
-
-    crypto =
-      receiveAsset;
-
-
-    fiat =
-      fiatCurrency();
-
-  }
-
-
-  if (
-    !crypto ||
-    !fiat
-  ) {
-
-    return null;
-
-  }
-
-
-  /*
-    Live rate.
-  */
-
-  const liveRate =
-    live?.[crypto]?.[fiat];
-
-
-  if (
-    Number(liveRate) > 0
-  ) {
-
-    return Number(
-      liveRate
-    );
-
-  }
-
-
-  /*
-    Optional config fallback.
-
-    Supported examples:
-
-    rate: 100000
-
-    OR
-
-    rates: {
-      USD: 100000,
-      EUR: 85000
-    }
-  */
-
-  const data =
-    cryptos()[crypto] ||
-    {};
-
-
-  if (
-    data.rates &&
-    Number(
-      data.rates[fiat]
-    ) > 0
-  ) {
-
-    return Number(
-      data.rates[fiat]
-    );
-
-  }
-
-
-  if (
-    fiat === "USD" &&
-    Number(data.rate) > 0
-  ) {
-
-    return Number(
-      data.rate
-    );
-
-  }
-
-
-  return null;
-
-}
-
-
-/* =========================================================
-   CALCULATE
-   ========================================================= */
-
-function calculate() {
-
-  const amount =
-    Number(
-      $("amount").value || 0
-    );
-
-
-  if (
-    !(amount > 0)
-  ) {
-
-    return null;
-
-  }
-
-
-  const market =
-    marketRate();
-
-
-  if (
-    !(market > 0)
-  ) {
-
-    return null;
-
-  }
-
-
-  const customer =
-    market *
-    (1 + fee());
-
-
-  let receive = 0;
-
-
-  /*
-    Crypto → Payment
-
-    Example:
-
-    100 USDT
-    Market = 1 USD
-    Fee = 28%
-
-    Customer rate = 1.28 USD
-
-    Receive = 128 USD
-  */
-
-  if (
-    isCryptoToPayment()
-  ) {
-
-    receive =
-      amount *
-      customer;
-
-  }
-
-
-  /*
-    Payment → Crypto
-
-    Example:
-
-    128 USD
-    Market = 1 USD / USDT
-    Fee = 28%
-
-    Receive = 100 USDT
-  */
-
-  if (
-    isPaymentToCrypto()
-  ) {
-
-    receive =
-      amount /
-      customer;
-
-  }
-
-
-  return {
-
-    amount,
-    market,
-    customer,
-    receive
-
-  };
-
-}
-
-
-/* =========================================================
-   UPDATE CALCULATION
-   ========================================================= */
-
-function update() {
-
-  const result =
-    calculate();
-
-
-  if (!result) {
-
-    $("receive").textContent =
-      "—";
-
-
-    $("marketRate").textContent =
-      "—";
-
-
-    $("customerRate").textContent =
-      "—";
-
-
-    return;
-
-  }
-
-
-  /*
-    Crypto → Payment
-  */
-
-  if (
-    isCryptoToPayment()
-  ) {
-
-    const fiat =
-      fiatCurrency();
-
-
-    $("receive").textContent =
-      `${fmt(result.receive)} ${fiat}`;
-
-
-    $("marketRate").textContent =
-      `1 ${sendAsset} ≈ ${fmt(result.market)} ${fiat}`;
-
-
-    $("customerRate").textContent =
-      `1 ${sendAsset} ≈ ${fmt(result.customer)} ${fiat}`;
-
-
-    return;
-
-  }
-
-
-  /*
-    Payment → Crypto
-  */
-
-  if (
-    isPaymentToCrypto()
-  ) {
-
-    const fiat =
-      fiatCurrency();
-
-
-    $("receive").textContent =
-      `${fmt(result.receive)} ${receiveAsset}`;
-
-
-    $("marketRate").textContent =
-      `1 ${receiveAsset} ≈ ${fmt(result.market)} ${fiat}`;
-
-
-    /*
-      Customer rate is deliberately
-      shown as the crypto price.
-
-      Example:
-
-      1 USDT ≈ 1.28 USD
-    */
-
-    $("customerRate").textContent =
-      `1 ${receiveAsset} ≈ ${fmt(result.customer)} ${fiat}`;
-
-  }
-
-}
-
-
-/* =========================================================
-   LIVE MARKET RATE
-   ========================================================= */
+LIVE RATE API
+========================================================= */
 
 async function fetchLiveRate() {
 
-  try {
+const cryptoList =
+Object.keys(
+cryptos()
+);
 
-    $("rateStatus").textContent =
-      "Updating live market rate…";
+const fiatList = [
+"USD",
+"EUR",
+"CAD",
+"AUD",
+"GBP",
+"BRL",
+"MXN"
+];
 
+const newRates =
+{};
 
-    const assets =
-      Object.keys(
-        cryptos()
-      );
+$("rateStatus")
+.textContent =
+"Updating live market rate…";
 
+/*
+Request each configured crypto
+separately.
 
-    if (
-      !assets.length
-    ) {
+```
+This supports:
 
-      throw new Error(
-        "No crypto assets configured"
-      );
+USDT
+BTC
+ETH
+SOL
+USDC
+etc.
+```
 
-    }
+*/
 
+for (
+const crypto of cryptoList
+) {
 
-    const rates = {};
+```
+try {
 
-
-    /*
-      Fetch every configured crypto.
-
-      Coinbase endpoint:
-
-      /v2/exchange-rates?currency=BTC
-    */
-
-    for (
-      const asset of assets
-    ) {
-
-      try {
-
-        const response =
-          await fetch(
-            `https://api.coinbase.com/v2/exchange-rates?currency=${encodeURIComponent(asset)}`,
-            {
-              cache: "no-store"
-            }
-          );
-
-
-        if (
-          !response.ok
-        ) {
-
-          console.warn(
-            `Rate request failed for ${asset}`
-          );
-
-          continue;
-
-        }
+  const response =
+    await fetch(
+      `https://api.coinbase.com/v2/exchange-rates?currency=${encodeURIComponent(crypto)}`,
+      {
+        cache:
+          "no-store"
+      }
+    );
 
 
-        const data =
-          await response.json();
+  if (
+    !response.ok
+  ) {
+
+    continue;
+
+  }
 
 
-        const sourceRates =
-          data?.data?.rates;
+  const data =
+    await response.json();
 
 
-        if (
-          !sourceRates
-        ) {
-
-          continue;
-
-        }
+  const rates =
+    data?.data?.rates;
 
 
-        rates[asset] = {};
+  if (
+    !rates
+  ) {
+
+    continue;
+
+  }
 
 
-        /*
-          Main fiat currencies.
-        */
-
-        [
-          "USD",
-          "EUR",
-          "CAD",
-          "AUD",
-          "GBP",
-          "BRL",
-          "MXN"
-
-        ].forEach(
-          fiat => {
-
-            const value =
-              Number(
-                sourceRates[fiat]
-              );
+  newRates[crypto] =
+    {};
 
 
-            if (
-              value > 0
-            ) {
+  fiatList.forEach(
+    fiat => {
 
-              rates[asset][fiat] =
-                value;
-
-            }
-
-          }
+      const value =
+        Number(
+          rates[fiat]
         );
 
-      } catch (error) {
 
-        console.warn(
-          `Unable to fetch ${asset} rate`,
-          error
-        );
+      if (
+        value > 0
+      ) {
+
+        newRates[crypto][fiat] =
+          value;
 
       }
 
     }
+  );
 
+} catch (
+  error
+) {
 
-    /*
-      Save rates.
-    */
-
-    if (
-      Object.keys(rates).length
-    ) {
-
-      live =
-        rates;
-
-    }
-
-
-    if (
-      !Object.keys(live).length
-    ) {
-
-      throw new Error(
-        "No live rates received"
-      );
-
-    }
-
-
-    $("rateStatus").textContent =
-      "● Live market rate";
-
-
-    $("rateStatus")
-      .classList
-      .add("ok");
-
-
-    update();
-
-  } catch (error) {
-
-    console.error(
-      "Live rate error:",
-      error
-    );
-
-
-    $("rateStatus").textContent =
-      "Live rate temporarily unavailable";
-
-
-    $("rateStatus")
-      .classList
-      .remove("ok");
-
-  }
-
-}
-
-
-/* =========================================================
-   ORDER ID
-   ========================================================= */
-
-function newOrder() {
-
-  return (
-    "EP247-" +
-    String(
-      Date.now()
-    ).slice(-6)
+  console.warn(
+    `Rate failed for ${crypto}`,
+    error
   );
 
 }
+```
 
+}
 
-/* =========================================================
-   DRAWERS
-   ========================================================= */
+/*
+Only replace live rates
+if at least one asset
+was successfully loaded.
+*/
 
-function showDrawer(
-  id,
-  show
+if (
+Object.keys(
+newRates
+).length
 ) {
 
-  $(id)
-    .classList
-    .toggle(
-      "hidden",
-      !show
-    );
+```
+liveRates =
+  newRates;
+
+
+$("rateStatus")
+  .textContent =
+    "● Live market rate";
+
+
+$("rateStatus")
+  .classList
+  .add("ok");
+```
+
+} else {
+
+```
+$("rateStatus")
+  .textContent =
+    "Live rate temporarily unavailable";
+
+
+$("rateStatus")
+  .classList
+  .remove("ok");
+```
+
+}
+
+update();
+
+}
+
+/* =========================================================
+ORDER ID
+========================================================= */
+
+function newOrder() {
+
+return (
+"EP247-" +
+String(
+Date.now()
+).slice(-6)
+);
+
+}
+
+/* =========================================================
+DRAWER
+========================================================= */
+
+function showDrawer(
+id,
+show
+) {
+
+$(id)
+.classList
+.toggle(
+"hidden",
+!show
+);
+
+}
+
+/* =========================================================
+PAYMENT DATA
+========================================================= */
+
+function paymentDataForOrder() {
+
+/*
+Crypto → Payment
+
+```
+Payment information is
+the RECEIVE payment method.
+```
+
+*/
+
+if (
+isCryptoToPayment()
+) {
+
+```
+return receiveData();
+```
+
+}
+
+/*
+Payment → Crypto
+
+```
+Payment information is
+the SEND payment method.
+```
+
+*/
+
+return sendData();
+
+}
+
+/* =========================================================
+RENDER PAYMENT
+========================================================= */
+
+function renderPayment() {
+
+const sendAmount =
+Number(
+$("sendAmount").value ||
+0
+);
+
+const result =
+calculateFromSend(
+sendAmount
+);
+
+if (
+!result
+) {
+
+```
+alert(
+  "Live market rate is not available yet."
+);
+
+return false;
+```
+
+}
+
+orderId =
+newOrder();
+
+const payment =
+paymentDataForOrder();
+
+$("orderBadge")
+.textContent =
+orderId;
+
+/*
+PAYMENT → CRYPTO
+
+```
+Customer must pay using
+the configured payment method.
+```
+
+*/
+
+if (
+isPaymentToCrypto()
+) {
+
+```
+if (
+  payment.status ===
+  "request"
+) {
+
+  window.open(
+    `https://t.me/${support()}`,
+    "_blank"
+  );
+
+  return false;
 
 }
 
 
-/* =========================================================
-   PAYMENT FIELDS HTML
-   ========================================================= */
+$("paymentTitle")
+  .textContent =
+    `${payment.title || sendAsset} Payment Details`;
 
-function paymentFieldsHTML(
-  payment
+
+const fields =
+  payment.fields ||
+  [];
+
+
+$("paymentInfo")
+  .innerHTML =
+    fields
+      .map(
+        ([key, value]) => `
+
+          <div class="payment-row">
+
+            <span>
+              ${escapeHTML(key)}
+            </span>
+
+            <b>
+              ${escapeHTML(value)}
+            </b>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+
+if (
+  !fields.length
 ) {
 
-  if (
-    !payment.fields ||
-    !payment.fields.length
-  ) {
-
-    return `
+  $("paymentInfo")
+    .innerHTML = `
 
       <div class="payment-row">
 
@@ -1554,825 +1918,730 @@ function paymentFieldsHTML(
 
     `;
 
-  }
-
-
-  return payment.fields
-    .map(
-      ([key, value]) => `
-
-        <div class="payment-row">
-
-          <span>
-            ${escapeHTML(key)}
-          </span>
-
-          <b>
-            ${escapeHTML(value)}
-          </b>
-
-        </div>
-
-      `
-    )
-    .join("");
+}
+```
 
 }
 
+/*
+CRYPTO → PAYMENT
 
-/* =========================================================
-   RENDER PAYMENT STEP
-   ========================================================= */
+```
+Customer sends crypto.
 
-function renderPayment() {
+Show crypto payment instructions.
+```
 
-  const result =
-    calculate();
+*/
 
+else {
 
-  if (!result) {
+```
+$("paymentTitle")
+  .textContent =
+    `Send ${sendAsset}`;
 
-    alert(
-      "Live market rate is not available yet."
-    );
 
-    return false;
+$("paymentInfo")
+  .innerHTML = `
 
-  }
+    <div class="payment-row">
 
+      <span>
+        Asset
+      </span>
 
-  orderId =
-    newOrder();
+      <b>
+        ${escapeHTML(sendAsset)}
+      </b>
 
+    </div>
 
-  /*
-    =======================================================
-    PAYMENT → CRYPTO
-    =======================================================
-  */
+    <div class="payment-row">
 
-  if (
-    isPaymentToCrypto()
-  ) {
+      <span>
+        Amount
+      </span>
 
-    const payment =
-      sendPaymentData();
+      <b>
+        ${fmt(result.send)}
+        ${escapeHTML(sendAsset)}
+      </b>
 
+    </div>
 
-    /*
-      Payment method requiring
-      manual support.
-    */
+    <div class="payment-row">
 
-    if (
-      payment.status === "request"
-    ) {
+      <span>
+        Network
+      </span>
 
-      window.open(
-        `https://t.me/${support()}`,
-        "_blank"
-      );
+      <b>
+        ${escapeHTML(
+          $("network").value
+        )}
+      </b>
 
-      return false;
+    </div>
 
-    }
+    <div class="payment-row">
 
+      <span>
+        Receiving Method
+      </span>
 
-    $("paymentTitle").textContent =
-      `${payment.title || sendAsset} Payment Details`;
+      <b>
+        ${escapeHTML(receiveAsset)}
+      </b>
 
+    </div>
 
-    $("paymentInfo").innerHTML =
-      paymentFieldsHTML(
-        payment
-      );
-
-
-    $("paySummary").textContent =
-      `${fmt(result.amount)} ${
-        payment.currency || "USD"
-      }`;
-
-
-    $("receiveSummary").textContent =
-      `${fmt(result.receive)} ${
-        receiveAsset
-      }`;
-
-
-    $("methodSummary").textContent =
-      sendAsset;
-
-
-    $("rateSummary").textContent =
-      `1 ${receiveAsset} ≈ ${
-        fmt(result.customer)
-      } ${
-        payment.currency || "USD"
-      }`;
-
-
-    $("destinationLabel").textContent =
-      "Receiving Crypto Address";
-
-
-    $("destination").placeholder =
-      "Enter your crypto wallet address";
-
-
-    return true;
-
-  }
-
-
-  /*
-    =======================================================
-    CRYPTO → PAYMENT
-    =======================================================
-  */
-
-  if (
-    isCryptoToPayment()
-  ) {
-
-    const payment =
-      receivePaymentData();
-
-
-    /*
-      If receiving payment method
-      requires manual support.
-    */
-
-    if (
-      payment.status === "request"
-    ) {
-
-      /*
-        Unlike Payment → Crypto,
-        there are no payment details
-        required from us here.
-
-        The order can still be created.
-      */
-
-      $("paymentTitle").textContent =
-        "Exchange Order";
-
-
-      $("paymentInfo").innerHTML = `
-
-        <div class="payment-row">
-
-          <span>
-            Status
-          </span>
-
-          <b>
-            Contact Support
-          </b>
-
-        </div>
-
-        <div class="payment-row">
-
-          <span>
-            Receiving Method
-          </span>
-
-          <b>
-            ${escapeHTML(receiveAsset)}
-          </b>
-
-        </div>
-
-      `;
-
-    } else {
-
-      $("paymentTitle").textContent =
-        "Exchange Order Details";
-
-
-      $("paymentInfo").innerHTML = `
-
-        <div class="payment-row">
-
-          <span>
-            Exchange
-          </span>
-
-          <b>
-            Crypto → Payment
-          </b>
-
-        </div>
-
-        <div class="payment-row">
-
-          <span>
-            Receiving Method
-          </span>
-
-          <b>
-            ${escapeHTML(receiveAsset)}
-          </b>
-
-        </div>
-
-        <div class="payment-row">
-
-          <span>
-            Receiving Currency
-          </span>
-
-          <b>
-            ${escapeHTML(
-              payment.currency ||
-              "USD"
-            )}
-          </b>
-
-        </div>
-
-      `;
-
-    }
-
-
-    $("paySummary").textContent =
-      `${fmt(result.amount)} ${sendAsset}`;
-
-
-    $("receiveSummary").textContent =
-      `${fmt(result.receive)} ${
-        payment.currency ||
-        "USD"
-      }`;
-
-
-    $("methodSummary").textContent =
-      receiveAsset;
-
-
-    $("rateSummary").textContent =
-      `1 ${sendAsset} ≈ ${
-        fmt(result.customer)
-      } ${
-        payment.currency ||
-        "USD"
-      }`;
-
-
-    $("destinationLabel").textContent =
-      "Receiving Payment Account";
-
-
-    $("destination").placeholder =
-      "Enter your receiving account / email";
-
-
-    return true;
-
-  }
-
-
-  return false;
+  `;
+```
 
 }
 
+$("paySummary")
+.textContent =
+`${fmt(result.send)} ${sendCurrency()}`;
+
+$("receiveSummary")
+.textContent =
+`${fmt(result.receive)} ${receiveCurrency()}`;
+
+$("methodSummary")
+.textContent =
+receiveAsset;
+
+$("rateSummary")
+.textContent =
+$("customerRate").textContent;
+
+return true;
+
+}
 
 /* =========================================================
-   PAYMENT TEXT
-   ========================================================= */
+PAYMENT TEXT
+========================================================= */
 
 function paymentText() {
 
-  const lines = [];
+const lines = [];
 
+lines.push(
+"EXCHANGEPAY247"
+);
 
-  lines.push(
-    "EXCHANGEPAY247"
-  );
+lines.push(
+`Order ID: ${orderId}`
+);
 
-
-  lines.push(
-    `Order ID: ${orderId}`
-  );
-
-
-  lines.push(
-    `Direction: ${
+lines.push(
+`Direction: ${
       isCryptoToPayment()
         ? "Crypto → Payment"
         : "Payment → Crypto"
     }`
-  );
+);
+
+lines.push(
+`Send: ${$("paySummary").textContent}`
+);
+
+lines.push(
+`Receive: ${$("receiveSummary").textContent}`
+);
+
+lines.push(
+`Method: ${$("methodSummary").textContent}`
+);
+
+lines.push(
+`Rate: ${$("rateSummary").textContent}`
+);
+
+if (
+isPaymentToCrypto()
+) {
+
+```
+const payment =
+  sendData();
 
 
-  lines.push(
-    `Send: ${
-      $("paySummary").textContent
-    }`
-  );
+(
+  payment.fields ||
+  []
+)
+.forEach(
+  ([key, value]) => {
 
-
-  lines.push(
-    `Receive: ${
-      $("receiveSummary").textContent
-    }`
-  );
-
-
-  lines.push(
-    `Method: ${
-      $("methodSummary").textContent
-    }`
-  );
-
-
-  lines.push(
-    `Rate: ${
-      $("rateSummary").textContent
-    }`
-  );
-
-
-  /*
-    Payment details are relevant
-    when customer sends payment.
-  */
-
-  if (
-    isPaymentToCrypto()
-  ) {
-
-    const payment =
-      sendPaymentData();
-
-
-    if (
-      payment.fields?.length
-    ) {
-
-      lines.push("");
-
-      payment.fields.forEach(
-        ([key, value]) => {
-
-          lines.push(
-            `${key}: ${value}`
-          );
-
-        }
-      );
-
-    }
-
-  }
-
-
-  return lines.join(
-    "\n"
-  );
-
-}
-
-
-/* =========================================================
-   SELECTORS
-   ========================================================= */
-
-$("sendSelector").onclick =
-  () =>
-    openPicker("send");
-
-
-$("receiveSelector").onclick =
-  () =>
-    openPicker("receive");
-
-
-$("closePicker").onclick =
-  closePicker;
-
-
-/* =========================================================
-   CLOSE PICKER OUTSIDE
-   ========================================================= */
-
-$("picker").addEventListener(
-  "click",
-  event => {
-
-    if (
-      event.target ===
-      $("picker")
-    ) {
-
-      closePicker();
-
-    }
+    lines.push(
+      `${key}: ${value}`
+    );
 
   }
 );
+```
 
+}
 
-/* =========================================================
-   AMOUNT EVENT
-   ========================================================= */
+return lines.join(
+"\n"
+);
 
-$("amount").oninput =
-  update;
-
-
-/* =========================================================
-   CONTINUE
-   ========================================================= */
-
-$("continueBtn").onclick =
-  () => {
-
-    if (
-      renderPayment()
-    ) {
-
-      showDrawer(
-        "paymentStep",
-        true
-      );
-
-
-      showDrawer(
-        "submitStep",
-        false
-      );
-
-
-      window.scrollTo({
-
-        top: 0,
-
-        behavior: "smooth"
-
-      });
-
-    }
-
-  };
-
+}
 
 /* =========================================================
-   BACK HOME
-   ========================================================= */
+EVENTS
+========================================================= */
 
-$("backHome").onclick =
-  () => {
+/*
+SEND = CRYPTO
+*/
+
+$("sendCryptoBtn")
+.onclick =
+() => {
+
+```
+  /*
+    Keep current crypto
+    if already selected.
+
+    When changing from Payment
+    to Crypto, choose first crypto
+    if current send asset isn't crypto.
+  */
+
+  if (
+    !cryptos()[sendAsset]
+  ) {
+
+    sendAsset =
+      Object.keys(
+        cryptos()
+      )[0] ||
+      "USDT";
+
+  }
+
+
+  /*
+    Receive must be Payment.
+  */
+
+  if (
+    !payments()[receiveAsset]
+  ) {
+
+    receiveAsset =
+      Object.keys(
+        payments()
+      )[0] ||
+      "Bank US";
+
+  }
+
+
+  direction =
+    "crypto-to-payment";
+
+
+  render();
+
+};
+```
+
+/*
+SEND = PAYMENT
+*/
+
+$("sendPaymentBtn")
+.onclick =
+() => {
+
+```
+  if (
+    !payments()[sendAsset]
+  ) {
+
+    sendAsset =
+      Object.keys(
+        payments()
+      )[0] ||
+      "Bank US";
+
+  }
+
+
+  if (
+    !cryptos()[receiveAsset]
+  ) {
+
+    receiveAsset =
+      Object.keys(
+        cryptos()
+      )[0] ||
+      "USDT";
+
+  }
+
+
+  direction =
+    "payment-to-crypto";
+
+
+  render();
+
+};
+```
+
+/*
+SEND SELECTOR
+*/
+
+$("sendSelector")
+.onclick =
+() =>
+openPicker(
+"send"
+);
+
+/*
+RECEIVE SELECTOR
+*/
+
+$("receiveSelector")
+.onclick =
+() =>
+openPicker(
+"receive"
+);
+
+/*
+CLOSE PICKER
+*/
+
+$("closePicker")
+.onclick =
+closePicker;
+
+$("picker")
+.addEventListener(
+"click",
+event => {
+
+```
+  if (
+    event.target ===
+    $("picker")
+  ) {
+
+    closePicker();
+
+  }
+
+}
+```
+
+);
+
+/*
+SEND INPUT
+*/
+
+$("sendAmount")
+.addEventListener(
+"input",
+update
+);
+
+/*
+RECEIVE INPUT
+*/
+
+$("receiveAmount")
+.addEventListener(
+"input",
+update
+);
+
+/*
+NETWORK
+*/
+
+$("network")
+.addEventListener(
+"change",
+updateNetworkPreview
+);
+
+/*
+SWAP
+*/
+
+$("swapBtn")
+.onclick =
+swap;
+
+/* =========================================================
+CONTINUE
+========================================================= */
+
+$("continueBtn")
+.onclick =
+() => {
+
+```
+  if (
+    renderPayment()
+  ) {
 
     showDrawer(
       "paymentStep",
-      false
-    );
-
-
-    window.scrollTo({
-
-      top: 0,
-
-      behavior: "smooth"
-
-    });
-
-  };
-
-
-/* =========================================================
-   I'VE PAID
-   ========================================================= */
-
-$("paidBtn").onclick =
-  () => {
-
-    showDrawer(
-      "paymentStep",
-      false
+      true
     );
 
 
     showDrawer(
       "submitStep",
-      true
-    );
-
-
-    window.scrollTo({
-
-      top: 0,
-
-      behavior: "smooth"
-
-    });
-
-  };
-
-
-/* =========================================================
-   BACK PAYMENT
-   ========================================================= */
-
-$("backPayment").onclick =
-  () => {
-
-    showDrawer(
-      "submitStep",
       false
     );
 
 
-    showDrawer(
-      "paymentStep",
-      true
-    );
-
-
     window.scrollTo({
 
       top: 0,
 
-      behavior: "smooth"
+      behavior:
+        "smooth"
 
     });
 
-  };
+  }
 
+};
+```
 
 /* =========================================================
-   COPY PAYMENT INFO
-   ========================================================= */
+BACK HOME
+========================================================= */
 
-$("copyInfo").onclick =
-  async () => {
+$("backHome")
+.onclick =
+() => {
 
-    const text =
-      paymentText();
+```
+  showDrawer(
+    "paymentStep",
+    false
+  );
+
+};
+```
+
+/* =========================================================
+PAID
+========================================================= */
+
+$("paidBtn")
+.onclick =
+() => {
+
+```
+  showDrawer(
+    "paymentStep",
+    false
+  );
 
 
-    try {
+  showDrawer(
+    "submitStep",
+    true
+  );
 
-      await navigator
-        .clipboard
-        .writeText(text);
+
+  window.scrollTo({
+
+    top: 0,
+
+    behavior:
+      "smooth"
+
+  });
+
+};
+```
+
+/* =========================================================
+BACK PAYMENT
+========================================================= */
+
+$("backPayment")
+.onclick =
+() => {
+
+```
+  showDrawer(
+    "submitStep",
+    false
+  );
 
 
-      $("copyInfo").textContent =
+  showDrawer(
+    "paymentStep",
+    true
+  );
+
+};
+```
+
+/* =========================================================
+COPY
+========================================================= */
+
+$("copyInfo")
+.onclick =
+async () => {
+
+```
+  const text =
+    paymentText();
+
+
+  try {
+
+    await navigator
+      .clipboard
+      .writeText(
+        text
+      );
+
+
+    $("copyInfo")
+      .textContent =
         "✓ COPIED";
 
 
-      setTimeout(
-        () => {
+    setTimeout(
+      () => {
 
-          $("copyInfo").textContent =
+        $("copyInfo")
+          .textContent =
             "COPY PAYMENT INFO";
 
-        },
-        1500
-      );
-
-
-    } catch (error) {
-
-      alert(text);
-
-    }
-
-  };
-
-
-/* =========================================================
-   SUBMIT ORDER
-   ========================================================= */
-
-$("submitOrder").onclick =
-  () => {
-
-    const destination =
-      $("destination")
-        .value
-        .trim();
-
-
-    if (
-      !destination
-    ) {
-
-      alert(
-        isPaymentToCrypto()
-          ? "Please enter your receiving crypto address."
-          : "Please enter your receiving payment account."
-      );
-
-      return;
-
-    }
-
-
-    /*
-      Receiving crypto requires
-      a valid network.
-    */
-
-    if (
-      isPaymentToCrypto()
-    ) {
-
-      const network =
-        $("network").value;
-
-
-      if (
-        !network ||
-        network ===
-        "Not applicable"
-      ) {
-
-        alert(
-          "Please select your receiving network."
-        );
-
-        return;
-
-      }
-
-    }
-
-
-    /*
-      Telegram.
-    */
-
-    const telegram =
-      $("telegram")
-        .value
-        .trim();
-
-
-    if (
-      !telegram
-    ) {
-
-      alert(
-        "Please enter your Telegram username."
-      );
-
-      return;
-
-    }
-
-
-    /*
-      Confirmation.
-    */
-
-    if (
-      !$("confirmCheck").checked
-    ) {
-
-      alert(
-        "Please confirm your information."
-      );
-
-      return;
-
-    }
-
-
-    const direction =
-      isCryptoToPayment()
-        ? "Crypto → Payment"
-        : "Payment → Crypto";
-
-
-    $("successText").textContent =
-      `Order ${orderId} has been submitted (${direction}). Please send your successful payment screenshot to our admin on Telegram with this Order ID.`;
-
-
-    $("success")
-      .classList
-      .remove("hidden");
-
-
-    $("submitOrder")
-      .classList
-      .add("hidden");
-
-  };
-
-
-/* =========================================================
-   SEND TELEGRAM
-   ========================================================= */
-
-$("sendTelegram").onclick =
-  () => {
-
-    const telegram =
-      $("telegram")
-        .value
-        .trim();
-
-
-    const transaction =
-      $("txid")
-        .value
-        .trim() ||
-      "N/A";
-
-
-    const destination =
-      $("destination")
-        .value
-        .trim();
-
-
-    const network =
-      $("network").value ||
-      "Not applicable";
-
-
-    const note =
-      $("note")
-        .value
-        .trim() ||
-      "N/A";
-
-
-    const direction =
-      isCryptoToPayment()
-        ? "Crypto → Payment"
-        : "Payment → Crypto";
-
-
-    const text =
-      `EXCHANGEPAY247 ORDER\n` +
-      `Order ID: ${orderId}\n` +
-      `Direction: ${direction}\n` +
-      `Send: ${$("paySummary").textContent}\n` +
-      `Receive: ${$("receiveSummary").textContent}\n` +
-      `Method: ${$("methodSummary").textContent}\n` +
-      `Rate: ${$("rateSummary").textContent}\n` +
-      `Telegram: ${telegram}\n` +
-      `Transaction ID: ${transaction}\n` +
-      `Receiving: ${destination}\n` +
-      `Network: ${network}\n` +
-      `Note: ${note}`;
-
-
-    window.open(
-      `https://t.me/${admin()}?text=${encodeURIComponent(text)}`,
-      "_blank"
+      },
+      1500
     );
 
-  };
+  } catch {
 
+    alert(
+      text
+    );
 
-/* =========================================================
-   NEW ORDER
-   ========================================================= */
+  }
 
-$("newOrder").onclick =
-  () => {
-
-    location.reload();
-
-  };
-
+};
+```
 
 /* =========================================================
-   SUPPORT LINKS
-   ========================================================= */
+SUBMIT ORDER
+========================================================= */
 
-$("supportNav").href =
-  `https://t.me/${support()}`;
+$("submitOrder")
+.onclick =
+() => {
+
+```
+  if (
+    !$("destination")
+      .value
+      .trim()
+  ) {
+
+    alert(
+      "Please enter your receiving information."
+    );
+
+    return;
+
+  }
 
 
-$("contactBtn").href =
-  `https://t.me/${support()}`;
+  if (
+    receiveType() ===
+      "crypto" &&
+    (
+      !$("network").value ||
+      $("network").value ===
+        "Not applicable"
+    )
+  ) {
 
+    alert(
+      "Please select a receiving network."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !$("telegram")
+      .value
+      .trim()
+  ) {
+
+    alert(
+      "Please enter your Telegram username."
+    );
+
+    return;
+
+  }
+
+
+  if (
+    !$("confirmCheck")
+      .checked
+  ) {
+
+    alert(
+      "Please confirm your information."
+    );
+
+    return;
+
+  }
+
+
+  $("successText")
+    .textContent =
+      `Order ${orderId} has been submitted. Please send your successful payment screenshot to our admin on Telegram with this Order ID.`;
+
+
+  $("success")
+    .classList
+    .remove(
+      "hidden"
+    );
+
+
+  $("submitOrder")
+    .classList
+    .add(
+      "hidden"
+    );
+
+};
+```
 
 /* =========================================================
-   INITIALIZE
-   ========================================================= */
+TELEGRAM
+========================================================= */
+
+$("sendTelegram")
+.onclick =
+() => {
+
+```
+  const transaction =
+    $("txid")
+      .value
+      .trim() ||
+    "N/A";
+
+
+  const destination =
+    $("destination")
+      .value
+      .trim();
+
+
+  const network =
+    $("network")
+      .value;
+
+
+  const note =
+    $("note")
+      .value
+      .trim() ||
+    "N/A";
+
+
+  const text =
+    `Payment screenshot for Order ${orderId}\n` +
+    `Direction: ${
+      isCryptoToPayment()
+        ? "Crypto → Payment"
+        : "Payment → Crypto"
+    }\n` +
+    `Send: ${
+      $("paySummary").textContent
+    }\n` +
+    `Receive: ${
+      $("receiveSummary").textContent
+    }\n` +
+    `Method: ${
+      $("methodSummary").textContent
+    }\n` +
+    `Telegram: ${
+      $("telegram").value.trim()
+    }\n` +
+    `Transaction ID: ${transaction}\n` +
+    `Receiving: ${destination}\n` +
+    `Network: ${network}\n` +
+    `Note: ${note}`;
+
+
+  window.open(
+    `https://t.me/${admin()}?text=${encodeURIComponent(text)}`,
+    "_blank"
+  );
+
+};
+```
+
+/* =========================================================
+NEW ORDER
+========================================================= */
+
+$("newOrder")
+.onclick =
+() =>
+location.reload();
+
+/* =========================================================
+SUPPORT
+========================================================= */
+
+$("supportNav")
+.href =
+`https://t.me/${support()}`;
+
+$("contactBtn")
+.href =
+`https://t.me/${support()}`;
+
+/* =========================================================
+INITIALIZE
+========================================================= */
+
+ensureAssets();
 
 render();
 
-
 fetchLiveRate();
 
-
 setInterval(
-  fetchLiveRate,
-  Number(
-    settings().refreshMs ||
-    60000
-  )
+fetchLiveRate,
+Number(
+settings().refreshMs ||
+60000
+)
 );

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,25 +17,25 @@
         </header>
 
         <div class="exchange-card">
-            <!-- Header thao tác -->
+            <!-- Header Operations -->
             <div class="swap-header">
-                <span class="mode-badge" id="modeBadge">Chiều: Crypto ➔ Payment</span>
+                <span class="mode-badge" id="modeBadge">Direction: Crypto ➔ Payment</span>
                 <div class="action-buttons">
-                    <button type="button" class="btn-swap" onclick="toggleDirection()" title="Đảo chiều giao dịch">
-                        <i class="fa-solid fa-arrows-rotate"></i> Đảo chiều
+                    <button type="button" class="btn-swap" onclick="toggleDirection()" title="Swap direction">
+                        <i class="fa-solid fa-arrows-rotate"></i> Swap
                     </button>
-                    <button type="button" class="btn-admin" onclick="openAdminModal()" title="Cập nhật tài khoản thủ công">
+                    <button type="button" class="btn-admin" onclick="openAdminModal()" title="Manage manual accounts">
                         <i class="fa-solid fa-gear"></i> Admin
                     </button>
                 </div>
             </div>
 
             <form id="exchangeForm" onsubmit="handleExchangeSubmit(event)">
-                <!-- BẠN GỬI -->
+                <!-- YOU SEND -->
                 <div class="form-group">
                     <div class="label-row">
-                        <label for="sendAmount">BẠN GỬI (YOU SEND)</label>
-                        <span class="input-hint">Nhập số lượng</span>
+                        <label for="sendAmount">YOU SEND</label>
+                        <span class="input-hint">Enter amount</span>
                     </div>
                     <div class="input-box">
                         <input type="number" id="sendAmount" placeholder="0.00" step="any" oninput="onSendAmountChange()">
@@ -43,11 +43,11 @@
                     </div>
                 </div>
 
-                <!-- BẠN NHẬN -->
+                <!-- YOU RECEIVE -->
                 <div class="form-group">
                     <div class="label-row">
-                        <label for="receiveAmount">BẠN NHẬN (YOU RECEIVE)</label>
-                        <span class="input-hint">Hoặc nhập số lượng</span>
+                        <label for="receiveAmount">YOU RECEIVE</label>
+                        <span class="input-hint">Or enter amount</span>
                     </div>
                     <div class="input-box">
                         <input type="number" id="receiveAmount" placeholder="0.00" step="any" oninput="onReceiveAmountChange()">
@@ -55,33 +55,33 @@
                     </div>
                 </div>
 
-                <!-- BẢNG TỶ GIÁ -->
+                <!-- RATE TABLE -->
                 <div class="info-box">
                     <div class="info-row">
-                        <span>Giá thị trường (<span id="cryptoSymbol">USDT</span>):</span>
+                        <span>Market Price (<span id="cryptoSymbol">USDT</span>):</span>
                         <strong id="marketRateText">...</strong>
                     </div>
                     <div class="info-row">
-                        <span>Phí dịch vụ:</span>
+                        <span>Service Fee:</span>
                         <strong id="feeText" class="fee-tag">0%</strong>
                     </div>
                     <div class="info-row total-row">
-                        <span>Tỷ giá áp dụng:</span>
+                        <span>Effective Exchange Rate:</span>
                         <strong id="effectiveRateText">1 Crypto = 0 USD</strong>
                     </div>
                 </div>
 
-                <!-- THÔNG TIN TÀI KHOẢN HOẶC KHUNG LIÊN HỆ ADMIN -->
+                <!-- ACCOUNT INFORMATION OR CONTACT ADMIN CARD -->
                 <div id="paymentAccountCard" class="account-card" style="display: none;"></div>
 
-                <!-- NÚT XÁC NHẬN -->
+                <!-- SUBMIT BUTTON -->
                 <button type="submit" id="btnSubmit" class="btn-submit">
                     <i class="fa-brands fa-telegram"></i> EXCHANGE VIA TELEGRAM
                 </button>
             </form>
 
             <div class="telegram-contact">
-                <p>Cần hỗ trợ giao dịch trực tiếp?</p>
+                <p>Need direct transaction support?</p>
                 <a href="https://t.me/exchangepay2477" target="_blank" class="telegram-link">
                     <i class="fa-brands fa-telegram"></i> Telegram: @exchangepay2477
                 </a>
@@ -91,38 +91,38 @@
         <footer>&copy; 2026 CRYPTO EXCHANGE. All rights reserved.</footer>
     </div>
 
-    <!-- MODAL ADMIN QUẢN LÝ TÀI KHOẢN THỦ CÔNG -->
+    <!-- ADMIN MODAL FOR MANUAL ACCOUNT MANAGEMENT -->
     <div id="adminModal" class="modal-overlay" style="display: none;">
         <div class="modal-content">
             <div class="modal-header">
-                <h3><i class="fa-solid fa-user-shield"></i> QUẢN LÝ TÀI KHOẢN THỦ CÔNG</h3>
+                <h3><i class="fa-solid fa-user-shield"></i> MANUAL ACCOUNT MANAGEMENT</h3>
                 <span class="close-modal" onclick="closeAdminModal()">&times;</span>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Chọn Phương Thức Thanh Toán:</label>
+                    <label>Select Payment Method:</label>
                     <select id="adminMethodSelect" class="admin-input" onchange="loadAdminForm()"></select>
                 </div>
                 <div class="form-group">
-                    <label>Tên Ngân hàng / Cổng thanh toán:</label>
-                    <input type="text" id="adminBankName" class="admin-input" placeholder="VD: Bank of America, Zelle, PayPal...">
+                    <label>Bank Name / Payment Gateway:</label>
+                    <input type="text" id="adminBankName" class="admin-input" placeholder="e.g. Bank of America, Zelle, PayPal...">
                 </div>
                 <div class="form-group">
-                    <label>Số tài khoản / Email nhận tiền:</label>
-                    <input type="text" id="adminAccNo" class="admin-input" placeholder="VD: pay@exchangepay247.com">
+                    <label>Account Number / Receiving Email:</label>
+                    <input type="text" id="adminAccNo" class="admin-input" placeholder="e.g. pay@exchangepay247.com">
                 </div>
                 <div class="form-group">
-                    <label>Chủ tài khoản:</label>
-                    <input type="text" id="adminAccHolder" class="admin-input" placeholder="VD: EXCHANGEPAY LTD">
+                    <label>Account Holder Name:</label>
+                    <input type="text" id="adminAccHolder" class="admin-input" placeholder="e.g. EXCHANGEPAY LTD">
                 </div>
                 <div class="form-group">
-                    <label>Ghi chú chuyển khoản:</label>
-                    <input type="text" id="adminNote" class="admin-input" placeholder="VD: Nhập đúng Telegram username">
+                    <label>Transfer Note / Memo:</label>
+                    <input type="text" id="adminNote" class="admin-input" placeholder="e.g. Include your Telegram username">
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-save" onclick="saveAccountManual()"><i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi</button>
-                <button type="button" class="btn-delete" onclick="deleteAccountManual()"><i class="fa-solid fa-trash"></i> Xóa Tài Khoản</button>
+                <button type="button" class="btn-save" onclick="saveAccountManual()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+                <button type="button" class="btn-delete" onclick="deleteAccountManual()"><i class="fa-solid fa-trash"></i> Delete Account</button>
             </div>
         </div>
     </div>

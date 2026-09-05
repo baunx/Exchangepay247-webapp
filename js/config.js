@@ -91,8 +91,8 @@ window.CONFIG = {
       icon: "assets/icons/zelle.svg",
 
       fields: [
-        ["Name", "YOUR ZELLE NAME"],
-        ["Email", "YOUR ZELLE EMAIL"]
+        ["Name", "THAI HUYNH"],
+        ["Email/Phone", "978 908 8895"]
       ]
     },
 

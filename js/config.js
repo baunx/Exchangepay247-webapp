@@ -92,7 +92,7 @@ window.CONFIG = {
 
       fields: [
         ["Name", "THAI HUYNH"],
-        ["Email/Phone", "978 908 8895"]
+        ["Email", "978 908 8895"]
       ]
     },
 

@@ -1,4 +1,3 @@
-
 const ICON_BASE_URLS = {
     crypto: (code) => `https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63539be13e331802464b03b44369527c327423/128/color/${code.toLowerCase()}.png`,
     payment: (slug) => `https://cdn.jsdelivr.net/npm/simple-icons@v9/icons/${slug}.svg`
@@ -24,17 +23,46 @@ const PAYMENTS = [
     { code: "WECHAT", name: "WeChat Pay (微信)", icon: ICON_BASE_URLS.payment("wechat") }
 ];
 
+// Fallback cấu hình nếu chưa load file config ngoài
+const SYSTEM_CONFIG = window.SYSTEM_CONFIG || { telegramAdmin: "admin_support" };
+const FEE_CONFIG = window.FEE_CONFIG || { defaultFee: 2, fees: {} };
+const DEFAULT_PAYMENT_ACCOUNTS = window.PAYMENT_ACCOUNTS || {};
+
 let currentDirection = "C2P"; 
 let marketPrices = { USDT: 1.0, BTC: 65000.0, ETH: 3500.0 };
 let lastEditedInput = "send";
 
-let activeAccounts = JSON.parse(localStorage.getItem("PAYMENT_ACCOUNTS_DATA")) || PAYMENT_ACCOUNTS;
+let activeAccounts = JSON.parse(localStorage.getItem("PAYMENT_ACCOUNTS_DATA")) || DEFAULT_PAYMENT_ACCOUNTS;
 
 document.addEventListener("DOMContentLoaded", () => {
     initSelectOptions();
+    bindEvents(); // [QUAN TRỌNG] Gán sự kiện lắng nghe người dùng gõ
     fetchRealtimePrices();
     recalculate();
 });
+
+// [FIX LỖI] Lắng nghe sự kiện gõ phím và thay đổi loại tiền
+function bindEvents() {
+    const sendInput = document.getElementById("sendAmount");
+    const receiveInput = document.getElementById("receiveAmount");
+    const sendSelect = document.getElementById("sendCurrency");
+    const receiveSelect = document.getElementById("receiveCurrency");
+
+    if (sendInput) {
+        sendInput.addEventListener("input", onSendAmountChange);
+        sendInput.addEventListener("keyup", onSendAmountChange);
+    }
+    if (receiveInput) {
+        receiveInput.addEventListener("input", onReceiveAmountChange);
+        receiveInput.addEventListener("keyup", onReceiveAmountChange);
+    }
+    if (sendSelect) {
+        sendSelect.addEventListener("change", onCurrencyChange);
+    }
+    if (receiveSelect) {
+        receiveSelect.addEventListener("change", onCurrencyChange);
+    }
+}
 
 function getMethodLogo(code) {
     const cryptoItem = CRYPTOS.find(c => c.code === code);
@@ -50,15 +78,19 @@ function initSelectOptions() {
     const sendSelect = document.getElementById("sendCurrency");
     const receiveSelect = document.getElementById("receiveCurrency");
 
+    if (!sendSelect || !receiveSelect) return;
+
     sendSelect.innerHTML = "";
     receiveSelect.innerHTML = "";
 
     if (currentDirection === "C2P") {
-        document.getElementById("modeBadge").innerText = "Chiều: Crypto ➔ Payment";
+        const modeBadge = document.getElementById("modeBadge");
+        if (modeBadge) modeBadge.innerText = "Chiều: Crypto ➔ Payment";
         CRYPTOS.forEach(c => sendSelect.add(new Option(c.name, c.code)));
         PAYMENTS.forEach(p => receiveSelect.add(new Option(p.name, p.code)));
     } else {
-        document.getElementById("modeBadge").innerText = "Chiều: Payment ➔ Crypto";
+        const modeBadge = document.getElementById("modeBadge");
+        if (modeBadge) modeBadge.innerText = "Chiều: Payment ➔ Crypto";
         PAYMENTS.forEach(p => sendSelect.add(new Option(p.name, p.code)));
         CRYPTOS.forEach(c => receiveSelect.add(new Option(c.name, c.code)));
     }
@@ -85,13 +117,13 @@ async function fetchRealtimePrices() {
 
 function getFeePercentage(cryptoCode, paymentCode, direction) {
     const pairKey = `${cryptoCode}_${paymentCode}`;
-    const pairConfig = FEE_CONFIG.fees[pairKey];
+    const pairConfig = FEE_CONFIG.fees ? FEE_CONFIG.fees[pairKey] : null;
     const dirKey = (direction === "C2P") ? "CRYPTO_TO_PAYMENT" : "PAYMENT_TO_CRYPTO";
 
     if (pairConfig && pairConfig[dirKey] !== undefined) {
         return pairConfig[dirKey];
     }
-    return FEE_CONFIG.defaultFee;
+    return FEE_CONFIG.defaultFee || 0;
 }
 
 function onSendAmountChange() { lastEditedInput = "send"; recalculate(); }
@@ -99,27 +131,40 @@ function onReceiveAmountChange() { lastEditedInput = "receive"; recalculate(); }
 function onCurrencyChange() { recalculate(); }
 
 function recalculate() {
-    const sendVal = document.getElementById("sendCurrency").value;
-    const receiveVal = document.getElementById("receiveCurrency").value;
+    const sendSelect = document.getElementById("sendCurrency");
+    const receiveSelect = document.getElementById("receiveCurrency");
+    
+    if (!sendSelect || !receiveSelect) return;
+
+    const sendVal = sendSelect.value;
+    const receiveVal = receiveSelect.value;
 
     let cryptoCode = (currentDirection === "C2P") ? sendVal : receiveVal;
     let paymentCode = (currentDirection === "C2P") ? receiveVal : sendVal;
 
-    document.getElementById("cryptoSymbol").innerText = cryptoCode;
+    const cryptoSymbolElem = document.getElementById("cryptoSymbol");
+    if (cryptoSymbolElem) cryptoSymbolElem.innerText = cryptoCode;
 
     const cryptoPriceUSD = marketPrices[cryptoCode] || 1.0;
-    document.getElementById("marketRateText").innerText = `$${cryptoPriceUSD.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+    const marketRateElem = document.getElementById("marketRateText");
+    if (marketRateElem) {
+        marketRateElem.innerText = `$${cryptoPriceUSD.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+    }
 
     const feePercent = getFeePercentage(cryptoCode, paymentCode, currentDirection);
-    document.getElementById("feeText").innerText = `${feePercent}%`;
+    const feeTextElem = document.getElementById("feeText");
+    if (feeTextElem) feeTextElem.innerText = `${feePercent}%`;
 
     const feeRate = feePercent / 100.0;
     const sendInput = document.getElementById("sendAmount");
     const receiveInput = document.getElementById("receiveAmount");
+    const effectiveRateElem = document.getElementById("effectiveRateText");
 
     if (currentDirection === "C2P") {
         const effectiveRate = cryptoPriceUSD * (1 - feeRate);
-        document.getElementById("effectiveRateText").innerText = `1 ${cryptoCode} = $${effectiveRate.toFixed(2)} USD`;
+        if (effectiveRateElem) {
+            effectiveRateElem.innerText = `1 ${cryptoCode} = $${effectiveRate.toFixed(2)} USD`;
+        }
 
         if (lastEditedInput === "send") {
             const sendAmt = parseFloat(sendInput.value) || 0;
@@ -130,7 +175,9 @@ function recalculate() {
         }
     } else {
         const effectiveRateUSDPerCrypto = cryptoPriceUSD / (1 - feeRate);
-        document.getElementById("effectiveRateText").innerText = `$${effectiveRateUSDPerCrypto.toFixed(2)} USD = 1 ${cryptoCode}`;
+        if (effectiveRateElem) {
+            effectiveRateElem.innerText = `$${effectiveRateUSDPerCrypto.toFixed(2)} USD = 1 ${cryptoCode}`;
+        }
 
         if (lastEditedInput === "send") {
             const sendAmt = parseFloat(sendInput.value) || 0;
@@ -147,6 +194,8 @@ function recalculate() {
 function updateAccountDisplay(paymentCode) {
     const accCard = document.getElementById("paymentAccountCard");
     const btnSubmit = document.getElementById("btnSubmit");
+    if (!accCard || !btnSubmit) return;
+
     const logoUrl = getMethodLogo(paymentCode);
 
     if (currentDirection === "P2C") {
@@ -200,15 +249,18 @@ function copyAccountNo() {
 
 function openAdminModal() {
     const select = document.getElementById("adminMethodSelect");
-    select.innerHTML = "";
-    PAYMENTS.forEach(p => select.add(new Option(p.name, p.code)));
-
-    loadAdminForm();
-    document.getElementById("adminModal").style.display = "flex";
+    if (select) {
+        select.innerHTML = "";
+        PAYMENTS.forEach(p => select.add(new Option(p.name, p.code)));
+        loadAdminForm();
+    }
+    const modal = document.getElementById("adminModal");
+    if (modal) modal.style.display = "flex";
 }
 
 function closeAdminModal() {
-    document.getElementById("adminModal").style.display = "none";
+    const modal = document.getElementById("adminModal");
+    if (modal) modal.style.display = "none";
 }
 
 function loadAdminForm() {
@@ -253,7 +305,7 @@ function deleteAccountManual() {
 }
 
 function handleExchangeSubmit(event) {
-    event.preventDefault();
+    if (event) event.preventDefault();
     const sendAmt = document.getElementById("sendAmount").value;
     const sendCurr = document.getElementById("sendCurrency").value;
     const recvAmt = document.getElementById("receiveAmount").value;

@@ -1,1 +1,12 @@
+name = "exchangepay247-worker"
+main = "src/index.js" # Hoặc đường dẫn đến file code chính của bạn
+compatibility_date = "2026-01-01"
 
+# Bật lịch chạy tự động cập nhật tỷ giá 1 phút/lần
+[triggers]
+crons = ["*/1 * * * *"]
+
+# Bộ nhớ tạm lưu tỷ giá
+[[kv_namespaces]]
+binding = "RATES_KV"
+id = "PASTE_ID_KV_CUA_BAN_VAO_DAY"

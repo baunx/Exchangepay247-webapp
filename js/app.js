@@ -24,7 +24,7 @@ const PAYMENTS = [
 ];
 
 // Fallback cấu hình nếu chưa load file config ngoài
-const SYSTEM_CONFIG = window.SYSTEM_CONFIG || { telegramAdmin: "admin_support" };
+const SYSTEM_CONFIG = window.SYSTEM_CONFIG || { telegramAdmin: "exchangepay2477" };
 const FEE_CONFIG = window.FEE_CONFIG || { defaultFee: 2, fees: {} };
 const DEFAULT_PAYMENT_ACCOUNTS = window.PAYMENT_ACCOUNTS || {};
 

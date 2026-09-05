@@ -1,932 +1,133 @@
-<!doctype html>
-
-<html lang="en">
-
+<!DOCTYPE html>
+<html lang="vi">
 <head>
-
-  <meta charset="utf-8">
-
-<meta
-name="viewport"
-content="width=device-width,initial-scale=1,viewport-fit=cover"
-
->
-
-<meta
-name="theme-color"
-content="#f5f7fa"
-
->
-
-  <title>EXCHANGEPAY247 — Crypto Exchange</title>
-
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRYPTO EXCHANGE — Exchange Crypto & Payment Methods</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
-<div class="app">
+    <div class="container">
+        <header>
+            <h1>CRYPTO EXCHANGE</h1>
+            <p>Exchange Crypto & Payment Methods — Fast & Secure</p>
+        </header>
 
-  <!-- ==========================================
-       HEADER
-  =========================================== -->
+        <div class="exchange-card">
+            <!-- Header thao tác -->
+            <div class="swap-header">
+                <span class="mode-badge" id="modeBadge">Chiều: Crypto ➔ Payment</span>
+                <div class="action-buttons">
+                    <button type="button" class="btn-swap" onclick="toggleDirection()" title="Đảo chiều giao dịch">
+                        <i class="fa-solid fa-arrows-rotate"></i> Đảo chiều
+                    </button>
+                    <button type="button" class="btn-admin" onclick="openAdminModal()" title="Cập nhật tài khoản thủ công">
+                        <i class="fa-solid fa-gear"></i> Admin
+                    </button>
+                </div>
+            </div>
 
-  <header class="top">
+            <form id="exchangeForm" onsubmit="handleExchangeSubmit(event)">
+                <!-- BẠN GỬI -->
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="sendAmount">BẠN GỬI (YOU SEND)</label>
+                        <span class="input-hint">Nhập số lượng</span>
+                    </div>
+                    <div class="input-box">
+                        <input type="number" id="sendAmount" placeholder="0.00" step="any" oninput="onSendAmountChange()">
+                        <select id="sendCurrency" onchange="onCurrencyChange()"></select>
+                    </div>
+                </div>
 
-```
-<div class="brand-wrap">
+                <!-- BẠN NHẬN -->
+                <div class="form-group">
+                    <div class="label-row">
+                        <label for="receiveAmount">BẠN NHẬN (YOU RECEIVE)</label>
+                        <span class="input-hint">Hoặc nhập số lượng</span>
+                    </div>
+                    <div class="input-box">
+                        <input type="number" id="receiveAmount" placeholder="0.00" step="any" oninput="onReceiveAmountChange()">
+                        <select id="receiveCurrency" onchange="onCurrencyChange()"></select>
+                    </div>
+                </div>
 
-  <div class="brand-logo">
-    EP
-  </div>
+                <!-- BẢNG TỶ GIÁ -->
+                <div class="info-box">
+                    <div class="info-row">
+                        <span>Giá thị trường (<span id="cryptoSymbol">USDT</span>):</span>
+                        <strong id="marketRateText">...</strong>
+                    </div>
+                    <div class="info-row">
+                        <span>Phí dịch vụ:</span>
+                        <strong id="feeText" class="fee-tag">0%</strong>
+                    </div>
+                    <div class="info-row total-row">
+                        <span>Tỷ giá áp dụng:</span>
+                        <strong id="effectiveRateText">1 Crypto = 0 USD</strong>
+                    </div>
+                </div>
 
-  <div>
+                <!-- THÔNG TIN TÀI KHOẢN HOẶC KHUNG LIÊN HỆ ADMIN -->
+                <div id="paymentAccountCard" class="account-card" style="display: none;"></div>
 
-    <div class="brand">
-      EXCHANGEPAY247
+                <!-- NÚT XÁC NHẬN -->
+                <button type="submit" id="btnSubmit" class="btn-submit">
+                    <i class="fa-brands fa-telegram"></i> EXCHANGE VIA TELEGRAM
+                </button>
+            </form>
+
+            <div class="telegram-contact">
+                <p>Cần hỗ trợ giao dịch trực tiếp?</p>
+                <a href="https://t.me/exchangepay2477" target="_blank" class="telegram-link">
+                    <i class="fa-brands fa-telegram"></i> Telegram: @exchangepay2477
+                </a>
+            </div>
+        </div>
+
+        <footer>&copy; 2026 CRYPTO EXCHANGE. All rights reserved.</footer>
     </div>
 
-    <div class="muted">
-      Crypto Exchange
+    <!-- MODAL ADMIN QUẢN LÝ TÀI KHOẢN THỦ CÔNG -->
+    <div id="adminModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-shield"></i> QUẢN LÝ TÀI KHOẢN THỦ CÔNG</h3>
+                <span class="close-modal" onclick="closeAdminModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Chọn Phương Thức Thanh Toán:</label>
+                    <select id="adminMethodSelect" class="admin-input" onchange="loadAdminForm()"></select>
+                </div>
+                <div class="form-group">
+                    <label>Tên Ngân hàng / Cổng thanh toán:</label>
+                    <input type="text" id="adminBankName" class="admin-input" placeholder="VD: Bank of America, Zelle, PayPal...">
+                </div>
+                <div class="form-group">
+                    <label>Số tài khoản / Email nhận tiền:</label>
+                    <input type="text" id="adminAccNo" class="admin-input" placeholder="VD: pay@exchangepay247.com">
+                </div>
+                <div class="form-group">
+                    <label>Chủ tài khoản:</label>
+                    <input type="text" id="adminAccHolder" class="admin-input" placeholder="VD: EXCHANGEPAY LTD">
+                </div>
+                <div class="form-group">
+                    <label>Ghi chú chuyển khoản:</label>
+                    <input type="text" id="adminNote" class="admin-input" placeholder="VD: Nhập đúng Telegram username">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-save" onclick="saveAccountManual()"><i class="fa-solid fa-floppy-disk"></i> Lưu Thay Đổi</button>
+                <button type="button" class="btn-delete" onclick="deleteAccountManual()"><i class="fa-solid fa-trash"></i> Xóa Tài Khoản</button>
+            </div>
+        </div>
     </div>
 
-  </div>
-
-</div>
-
-
-<a
-  id="supportNav"
-  class="support-link"
-  href="#"
-  target="_blank"
-  rel="noopener"
->
-  <span class="support-icon">?</span>
-  <span>Support</span>
-</a>
-```
-
-  </header>
-
-  <!-- ==========================================
-       MAIN
-  =========================================== -->
-
-  <main>
-
-```
-<!-- ========================================
-     STEPS
-========================================= -->
-
-<div class="steps">
-
-  <div
-    class="step active"
-    id="s1"
-  >
-
-    <b>1</b>
-
-    <span>
-      Exchange
-    </span>
-
-  </div>
-
-
-  <div class="line"></div>
-
-
-  <div
-    class="step"
-    id="s2"
-  >
-
-    <b>2</b>
-
-    <span>
-      Payment
-    </span>
-
-  </div>
-
-
-  <div class="line"></div>
-
-
-  <div
-    class="step"
-    id="s3"
-  >
-
-    <b>3</b>
-
-    <span>
-      Submit
-    </span>
-
-  </div>
-
-</div>
-
-
-
-<!-- ========================================
-     STEP 1
-========================================= -->
-
-<section id="step1">
-
-
-  <!-- HERO -->
-
-  <section class="hero">
-
-    <div class="hero-logo">
-      EP
-    </div>
-
-    <h1>
-      Crypto Exchange
-    </h1>
-
-    <p>
-      Fast • Simple • Worldwide
-    </p>
-
-  </section>
-
-
-
-  <!-- ======================================
-       SEND
-  ======================================= -->
-
-  <div class="exchange-card">
-
-    <div class="exchange-label">
-      You Send From
-    </div>
-
-
-    <!-- ONLY SEND SIDE HAS TYPE SWITCH -->
-
-    <div class="direction-switch">
-
-      <button
-        type="button"
-        class="direction-btn active"
-        id="sendCryptoBtn"
-      >
-        Crypto
-      </button>
-
-
-      <button
-        type="button"
-        class="direction-btn"
-        id="sendPaymentBtn"
-      >
-        Payment
-      </button>
-
-    </div>
-
-
-    <button
-      type="button"
-      class="asset-selector"
-      id="sendSelector"
-    >
-
-      <span
-        class="asset-icon"
-        id="sendIcon"
-      >
-        ₮
-      </span>
-
-
-      <span class="asset-info">
-
-        <strong id="sendName">
-          USDT
-        </strong>
-
-        <small id="sendSub">
-          Tether USDT
-        </small>
-
-      </span>
-
-
-      <span class="selector-arrow">
-        ›
-      </span>
-
-    </button>
-
-
-    <div class="amount-box">
-
-      <input
-        id="sendAmount"
-        type="number"
-        min="0"
-        step="0.00000001"
-        value="100"
-        inputmode="decimal"
-        placeholder="0.00"
-      >
-
-      <span
-        class="amount-token"
-        id="sendAmountToken"
-      >
-        ₮ USDT
-      </span>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- ======================================
-       SWAP
-  ======================================= -->
-
-  <div class="swap-wrap">
-
-    <button
-      type="button"
-      class="swap-button"
-      id="swapBtn"
-      aria-label="Swap direction"
-    >
-      ⇅
-    </button>
-
-  </div>
-
-
-
-  <!-- ======================================
-       RECEIVE
-  ======================================= -->
-
-  <div class="exchange-card">
-
-    <div class="exchange-label">
-      You Receive To
-    </div>
-
-
-    <!-- RECEIVE TYPE IS AUTOMATIC -->
-
-    <div
-      class="auto-direction"
-      id="receiveTypeLabel"
-    >
-      Payment
-    </div>
-
-
-    <button
-      type="button"
-      class="asset-selector"
-      id="receiveSelector"
-    >
-
-      <span
-        class="asset-icon"
-        id="receiveIcon"
-      >
-        🏦
-      </span>
-
-
-      <span class="asset-info">
-
-        <strong id="receiveName">
-          Bank US
-        </strong>
-
-        <small id="receiveSub">
-          USD • Available
-        </small>
-
-      </span>
-
-
-      <span class="selector-arrow">
-        ›
-      </span>
-
-    </button>
-
-
-    <div class="amount-box">
-
-      <input
-        id="receiveAmount"
-        type="number"
-        min="0"
-        step="0.00000001"
-        inputmode="decimal"
-        placeholder="0.00"
-      >
-
-      <span
-        class="amount-token"
-        id="receiveAmountToken"
-      >
-        USD
-      </span>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- ======================================
-       NETWORK PREVIEW
-  ======================================= -->
-
-  <div
-    class="network-preview hidden"
-    id="networkPreview"
-  >
-
-    <span>
-      Receiving Network
-    </span>
-
-    <strong id="networkPreviewValue">
-      —
-    </strong>
-
-  </div>
-
-
-
-  <!-- ======================================
-       RATE
-  ======================================= -->
-
-  <div class="rate-card">
-
-    <div class="rate-row">
-
-      <span>
-        Market Rate
-      </span>
-
-      <strong id="marketRate">
-        —
-      </strong>
-
-    </div>
-
-
-    <div class="rate-row">
-
-      <span>
-        Your Rate
-      </span>
-
-      <strong id="customerRate">
-        —
-      </strong>
-
-    </div>
-
-
-    <div
-      class="rate-status"
-      id="rateStatus"
-    >
-      Updating live market rate…
-    </div>
-
-  </div>
-
-
-
-  <!-- ======================================
-       CONTINUE
-  ======================================= -->
-
-  <button
-    type="button"
-    class="primary"
-    id="continueBtn"
-  >
-    CONTINUE →
-  </button>
-
-
-</section>
-
-
-
-<!-- ========================================
-     PAYMENT STEP
-========================================= -->
-
-<section
-  id="paymentStep"
-  class="drawer hidden"
->
-
-
-  <div class="page-title">
-
-    <button
-      type="button"
-      class="back"
-      id="backHome"
-    >
-      ‹
-    </button>
-
-
-    <div>
-
-      <h2>
-        Payment Information
-      </h2>
-
-      <p>
-        Complete the transfer using the details below.
-      </p>
-
-    </div>
-
-  </div>
-
-
-  <div
-    class="order-badge"
-    id="orderBadge"
-  >
-  </div>
-
-
-
-  <!-- PAYMENT INFO -->
-
-  <div class="card">
-
-    <div
-      class="section-title"
-      id="paymentTitle"
-    >
-      Payment Details
-    </div>
-
-
-    <div id="paymentInfo">
-    </div>
-
-
-    <button
-      type="button"
-      class="copy"
-      id="copyInfo"
-    >
-      COPY PAYMENT INFO
-    </button>
-
-  </div>
-
-
-
-  <!-- SUMMARY -->
-
-  <div class="card">
-
-    <div class="summary-row">
-
-      <span>
-        You Send
-      </span>
-
-      <strong id="paySummary">
-      </strong>
-
-    </div>
-
-
-    <div class="summary-row">
-
-      <span>
-        You Receive
-      </span>
-
-      <strong id="receiveSummary">
-      </strong>
-
-    </div>
-
-
-    <div class="summary-row">
-
-      <span>
-        Method
-      </span>
-
-      <strong id="methodSummary">
-      </strong>
-
-    </div>
-
-
-    <div class="summary-row">
-
-      <span>
-        Rate
-      </span>
-
-      <strong id="rateSummary">
-      </strong>
-
-    </div>
-
-  </div>
-
-
-
-  <div class="warning">
-
-    ⚠️ Send exactly the amount shown above.
-    After payment, continue to submit your order.
-
-  </div>
-
-
-  <button
-    type="button"
-    class="primary"
-    id="paidBtn"
-  >
-    I'VE PAID →
-  </button>
-
-
-</section>
-
-
-
-<!-- ========================================
-     SUBMIT STEP
-========================================= -->
-
-<section
-  id="submitStep"
-  class="drawer hidden"
->
-
-
-  <div class="page-title">
-
-    <button
-      type="button"
-      class="back"
-      id="backPayment"
-    >
-      ‹
-    </button>
-
-
-    <div>
-
-      <h2>
-        Submit Order
-      </h2>
-
-      <p>
-        Provide your receiving information.
-      </p>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- PAYMENT CONFIRMATION -->
-
-  <div class="card">
-
-    <div class="section-title">
-      Payment Confirmation
-    </div>
-
-
-    <div class="telegram-box">
-
-      <div class="tg-icon">
-        TG
-      </div>
-
-
-      <div>
-
-        <b>
-          Send your payment screenshot on Telegram
-        </b>
-
-        <p>
-          After submitting this order,
-          send the successful payment screenshot
-          to our admin together with your Order ID.
-        </p>
-
-      </div>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Transaction ID
-        <span>
-          (optional)
-        </span>
-      </label>
-
-
-      <input
-        id="txid"
-        type="text"
-        placeholder="Enter transaction ID"
-      >
-
-    </div>
-
-  </div>
-
-
-
-  <!-- RECEIVING INFORMATION -->
-
-  <div class="card">
-
-    <div class="section-title">
-      Receiving Information
-    </div>
-
-
-    <div class="field">
-
-      <label id="destinationLabel">
-        Receiving Account
-      </label>
-
-
-      <input
-        id="destination"
-        type="text"
-        placeholder="Enter your receiving information"
-      >
-
-    </div>
-
-
-    <div
-      class="field"
-      id="networkField"
-    >
-
-      <label>
-        Network
-      </label>
-
-
-      <select id="network">
-
-        <option>
-          Not applicable
-        </option>
-
-      </select>
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Telegram Username
-      </label>
-
-
-      <input
-        id="telegram"
-        type="text"
-        placeholder="@username"
-      >
-
-    </div>
-
-
-    <div class="field">
-
-      <label>
-        Note
-        <span>
-          (optional)
-        </span>
-      </label>
-
-
-      <textarea
-        id="note"
-        rows="3"
-        placeholder="Additional information"
-      ></textarea>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- CONFIRM -->
-
-  <label class="check">
-
-    <input
-      type="checkbox"
-      id="confirmCheck"
-    >
-
-    <span>
-      I confirm that the information
-      I submitted is correct.
-    </span>
-
-  </label>
-
-
-  <button
-    type="button"
-    class="primary"
-    id="submitOrder"
-  >
-    SUBMIT ORDER
-  </button>
-
-
-
-  <!-- SUCCESS -->
-
-  <div
-    id="success"
-    class="success hidden"
-  >
-
-    <div class="success-icon">
-      ✓
-    </div>
-
-
-    <h2>
-      Order Submitted
-    </h2>
-
-
-    <p id="successText">
-    </p>
-
-
-    <button
-      type="button"
-      class="primary"
-      id="sendTelegram"
-    >
-      SEND TO ADMIN ON TELEGRAM →
-    </button>
-
-
-    <button
-      type="button"
-      class="copy"
-      id="newOrder"
-    >
-      NEW ORDER
-    </button>
-
-  </div>
-
-
-</section>
-```
-
-  </main>
-
-  <!-- ==========================================
-       PICKER
-  =========================================== -->
-
-  <div
-    id="picker"
-    class="picker-overlay hidden"
-  >
-
-```
-<div class="picker">
-
-
-  <div class="picker-header">
-
-    <h3 id="pickerTitle">
-      Select Asset
-    </h3>
-
-
-    <button
-      type="button"
-      id="closePicker"
-      class="picker-close"
-    >
-      ×
-    </button>
-
-  </div>
-
-
-  <div
-    id="pickerList"
-    class="picker-list"
-  >
-  </div>
-
-
-</div>
-```
-
-  </div>
-
-  <!-- ==========================================
-       CONTACT
-  =========================================== -->
-
-<a
-id="contactBtn"
-class="contact-button"
-href="#"
-target="_blank"
-rel="noopener"
-aria-label="Contact Support"
-
->
-
-```
-<span class="contact-icon">
-  ?
-</span>
-
-<span>
-  Support
-</span>
-```
-
-  </a>
-
-  <!-- ==========================================
-       FOOTER
-  =========================================== -->
-
-  <footer>
-
-```
-EXCHANGEPAY247
-
-<span>
-  •
-</span>
-
-Crypto Exchange
-```
-
-  </footer>
-
-</div>
-
-<script src="config.js"></script>
-
-<script src="app.js"></script>
-
+    <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
 </body>
-
 </html>

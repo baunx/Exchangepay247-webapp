@@ -84,6 +84,7 @@ window.CONFIG = {
     },
 
 
+    // 🟢 ĐÃ CẬP NHẬT TÀI KHOẢN ZELLE TẠI ĐÂY:
     "Zelle": {
       status: "available",
       currency: "USD",
@@ -92,7 +93,8 @@ window.CONFIG = {
 
       fields: [
         ["Name", "THAI HUYNH"],
-        ["Email", "978 908 8895"]
+        ["Email / Phone", "978 908 8895"],
+        ["Note", "Consulting fee"]
       ]
     },
 

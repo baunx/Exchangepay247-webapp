@@ -26,7 +26,7 @@ const PAYMENTS = [
 // 🔒 Cấu hình Admin & Bảo mật
 const ADMIN_SECURITY = {
     password: "Admin@123@", // ⚠️ Mật khẩu Admin khi mở trên trình duyệt web
-    telegramAdminIds: [5322206115]  // ⚠️ THAY BẰNG TELEGRAM ID SỐ CỦA BẠN (Dùng bot @userinfobot để lấy ID)
+    telegramAdminIds: [5322206115]  // ⚠️ THAY BẰNG TELEGRAM ID SỐ CỦA BẠN
 };
 
 // Fallback cấu hình nếu chưa load file config ngoài
@@ -39,7 +39,19 @@ let marketPrices = { USDT: 1.0, BTC: 65000.0, ETH: 3500.0 };
 let lastEditedInput = "send";
 let isAdminAuthenticated = false;
 
-let activeAccounts = JSON.parse(localStorage.getItem("PAYMENT_ACCOUNTS_DATA")) || DEFAULT_PAYMENT_ACCOUNTS;
+// ⚡ SỬA LỖI TẠI ĐÂY: Ưu tiên dữ liệu từ File Cấu Hình Gốc (DEFAULT_PAYMENT_ACCOUNTS)
+function loadAccountsData() {
+    try {
+        const savedLocal = localStorage.getItem("PAYMENT_ACCOUNTS_DATA");
+        const localData = savedLocal ? JSON.parse(savedLocal) : {};
+        // Gộp dữ liệu: File gốc làm nền tảng, localData đè lên nếu có
+        return { ...DEFAULT_PAYMENT_ACCOUNTS, ...localData };
+    } catch (e) {
+        return DEFAULT_PAYMENT_ACCOUNTS || {};
+    }
+}
+
+let activeAccounts = loadAccountsData();
 
 document.addEventListener("DOMContentLoaded", () => {
     initSelectOptions();
@@ -210,14 +222,14 @@ function updateAccountDisplay(paymentCode) {
                     <img src="${logoUrl}" alt="${paymentCode}" style="width: 22px; height: 22px; object-fit: contain; filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));">
                     <span>THÔNG TIN TÀI KHOẢN NHẬN TIỀN</span>
                 </div>
-                <div class="account-row"><span>Cổng/Ngân hàng:</span> <strong>${accInfo.bankName}</strong></div>
+                <div class="account-row"><span>Cổng/Ngân hàng:</span> <strong>${accInfo.bankName || ''}</strong></div>
                 <div class="account-row">
                     <span>Số tài khoản/Email:</span> 
-                    <strong id="accNo" class="highlight-text">${accInfo.accountNo}</strong> 
+                    <strong id="accNo" class="highlight-text">${accInfo.accountNo || ''}</strong> 
                     <button type="button" class="btn-copy" onclick="copyAccountNo()"><i class="fa-regular fa-copy"></i></button>
                 </div>
-                <div class="account-row"><span>Chủ tài khoản:</span> <strong>${accInfo.accountHolder}</strong></div>
-                <div class="account-note"><i class="fa-solid fa-circle-info"></i> ${accInfo.note}</div>
+                <div class="account-row"><span>Chủ tài khoản:</span> <strong>${accInfo.accountHolder || ''}</strong></div>
+                <div class="account-note"><i class="fa-solid fa-circle-info"></i> ${accInfo.note || ''}</div>
             `;
             btnSubmit.innerHTML = `<i class="fa-brands fa-telegram"></i> ĐÃ CHUYỂN TIỀN - BÁO ADMIN`;
         } else {
@@ -251,7 +263,6 @@ function copyAccountNo() {
 
 // 🔐 Kiểm tra quyền Admin nghiêm ngặt
 function verifyAdminPermission() {
-    // 1. Kiểm tra xác thực Telegram ID khi dùng Mini App
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
     if (tgUser && tgUser.id) {
         if (ADMIN_SECURITY.telegramAdminIds.includes(Number(tgUser.id))) {
@@ -264,7 +275,6 @@ function verifyAdminPermission() {
         }
     }
 
-    // 2. Yêu cầu Mật khẩu nếu mở ở trình duyệt thường
     const userInput = prompt("🔒 Vui lòng nhập Mật khẩu Admin:");
     if (userInput !== null && userInput.trim() === ADMIN_SECURITY.password) {
         isAdminAuthenticated = true;
@@ -277,7 +287,6 @@ function verifyAdminPermission() {
 }
 
 function openAdminModal() {
-    // Luôn bắt buộc kiểm tra lại mỗi lần mở modal
     if (!verifyAdminPermission()) return;
 
     const select = document.getElementById("adminMethodSelect");
@@ -291,7 +300,6 @@ function openAdminModal() {
 }
 
 function closeAdminModal() {
-    // Reset phiên Admin ngay lập tức khi đóng Modal
     isAdminAuthenticated = false; 
     const modal = document.getElementById("adminModal");
     if (modal) modal.style.display = "none";
@@ -340,6 +348,17 @@ function deleteAccountManual() {
         closeAdminModal();
         recalculate();
     }
+}
+
+// 📋 HÀM XUẤT CODE CẤU HÌNH: Dùng để dán vào file config gốc
+function copyConfigToClipboard() {
+    const codeStr = `window.PAYMENT_ACCOUNTS = ${JSON.stringify(activeAccounts, null, 4)};`;
+    navigator.clipboard.writeText(codeStr).then(() => {
+        alert("📋 Đã copy code cấu hình vào Bộ nhớ tạm!\n\nHãy mở file config.js (hoặc file cấu hình gốc) và dán đè đoạn mã này vào.");
+    }).catch(err => {
+        console.log(codeStr);
+        alert("Mở Console (F12) để copy đoạn code cấu hình.");
+    });
 }
 
 function handleExchangeSubmit(event) {

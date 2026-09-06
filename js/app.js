@@ -23,6 +23,12 @@ const PAYMENTS = [
     { code: "WECHAT", name: "WeChat Pay (微信)", icon: ICON_BASE_URLS.payment("wechat") }
 ];
 
+// Cấu hình Admin & Bảo mật
+const ADMIN_SECURITY = {
+    password: "Admin@123@", // ⚠️ ĐỔI MẬT KHẨU ADMIN CỦA BẠN TẠI ĐÂY
+    telegramAdminUsername: "exchangepay2477" // Username Admin Telegram (không chứa dấu @)
+};
+
 // Fallback cấu hình nếu chưa load file config ngoài
 const SYSTEM_CONFIG = window.SYSTEM_CONFIG || { telegramAdmin: "exchangepay2477" };
 const FEE_CONFIG = window.FEE_CONFIG || { defaultFee: 2, fees: {} };
@@ -31,17 +37,17 @@ const DEFAULT_PAYMENT_ACCOUNTS = window.PAYMENT_ACCOUNTS || {};
 let currentDirection = "C2P"; 
 let marketPrices = { USDT: 1.0, BTC: 65000.0, ETH: 3500.0 };
 let lastEditedInput = "send";
+let isAdminAuthenticated = false;
 
 let activeAccounts = JSON.parse(localStorage.getItem("PAYMENT_ACCOUNTS_DATA")) || DEFAULT_PAYMENT_ACCOUNTS;
 
 document.addEventListener("DOMContentLoaded", () => {
     initSelectOptions();
-    bindEvents(); // [QUAN TRỌNG] Gán sự kiện lắng nghe người dùng gõ
+    bindEvents();
     fetchRealtimePrices();
     recalculate();
 });
 
-// [FIX LỖI] Lắng nghe sự kiện gõ phím và thay đổi loại tiền
 function bindEvents() {
     const sendInput = document.getElementById("sendAmount");
     const receiveInput = document.getElementById("receiveAmount");
@@ -56,12 +62,8 @@ function bindEvents() {
         receiveInput.addEventListener("input", onReceiveAmountChange);
         receiveInput.addEventListener("keyup", onReceiveAmountChange);
     }
-    if (sendSelect) {
-        sendSelect.addEventListener("change", onCurrencyChange);
-    }
-    if (receiveSelect) {
-        receiveSelect.addEventListener("change", onCurrencyChange);
-    }
+    if (sendSelect) sendSelect.addEventListener("change", onCurrencyChange);
+    if (receiveSelect) receiveSelect.addEventListener("change", onCurrencyChange);
 }
 
 function getMethodLogo(code) {
@@ -247,7 +249,31 @@ function copyAccountNo() {
     }
 }
 
+// 🔐 Hàm kiểm tra xác thực Admin
+function verifyAdminPermission() {
+    if (isAdminAuthenticated) return true;
+
+    // 1. Tự động kiểm tra nếu mở từ Telegram WebApp
+    const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+    if (tgUser && tgUser.username && tgUser.username.toLowerCase() === ADMIN_SECURITY.telegramAdminUsername.toLowerCase()) {
+        isAdminAuthenticated = true;
+        return true;
+    }
+
+    // 2. Yêu cầu nhập Mật khẩu nếu mở trên Trình duyệt thường
+    const userInput = prompt("🔒 Vui lòng nhập Mật khẩu Admin:");
+    if (userInput !== null && userInput.trim() === ADMIN_SECURITY.password) {
+        isAdminAuthenticated = true;
+        return true;
+    }
+
+    alert("❌ Truy cập bị từ chối! Bạn không có quyền Admin.");
+    return false;
+}
+
 function openAdminModal() {
+    if (!verifyAdminPermission()) return;
+
     const select = document.getElementById("adminMethodSelect");
     if (select) {
         select.innerHTML = "";
@@ -274,6 +300,8 @@ function loadAdminForm() {
 }
 
 function saveAccountManual() {
+    if (!isAdminAuthenticated && !verifyAdminPermission()) return;
+
     const code = document.getElementById("adminMethodSelect").value;
     const bankName = document.getElementById("adminBankName").value.trim();
     const accountNo = document.getElementById("adminAccNo").value.trim();
@@ -294,6 +322,8 @@ function saveAccountManual() {
 }
 
 function deleteAccountManual() {
+    if (!isAdminAuthenticated && !verifyAdminPermission()) return;
+
     const code = document.getElementById("adminMethodSelect").value;
     if (confirm(`Bạn có chắc muốn xóa tài khoản của ${code}?`)) {
         delete activeAccounts[code];
@@ -335,6 +365,7 @@ function handleExchangeSubmit(event) {
 
     window.open(`https://t.me/${SYSTEM_CONFIG.telegramAdmin}?text=${encodeURIComponent(msg)}`, "_blank");
 }
+
 // Phím tắt bí mật để mở Admin Modal (Ctrl + Shift + A)
 document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.shiftKey && (e.key === "A" || e.key === "a")) {

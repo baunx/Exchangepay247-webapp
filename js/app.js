@@ -335,3 +335,10 @@ function handleExchangeSubmit(event) {
 
     window.open(`https://t.me/${SYSTEM_CONFIG.telegramAdmin}?text=${encodeURIComponent(msg)}`, "_blank");
 }
+// Phím tắt bí mật để mở Admin Modal (Ctrl + Shift + A)
+document.addEventListener("keydown", (e) => {
+    if (e.ctrlKey && e.shiftKey && (e.key === "A" || e.key === "a")) {
+        e.preventDefault();
+        openAdminModal();
+    }
+});

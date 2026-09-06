@@ -23,10 +23,10 @@ const PAYMENTS = [
     { code: "WECHAT", name: "WeChat Pay (微信)", icon: ICON_BASE_URLS.payment("wechat") }
 ];
 
-// Cấu hình Admin & Bảo mật
+// 🔒 Cấu hình Admin & Bảo mật
 const ADMIN_SECURITY = {
-    password: "Admin@123@", // ⚠️ ĐỔI MẬT KHẨU ADMIN CỦA BẠN TẠI ĐÂY
-    telegramAdminUsername: "exchangepay2477" // Username Admin Telegram (không chứa dấu @)
+    password: "Admin@123@", // ⚠️ Mật khẩu Admin khi mở trên trình duyệt web
+    telegramAdminIds: [5322206115]  // ⚠️ THAY BẰNG TELEGRAM ID SỐ CỦA BẠN (Dùng bot @userinfobot để lấy ID)
 };
 
 // Fallback cấu hình nếu chưa load file config ngoài
@@ -249,29 +249,35 @@ function copyAccountNo() {
     }
 }
 
-// 🔐 Hàm kiểm tra xác thực Admin
+// 🔐 Kiểm tra quyền Admin nghiêm ngặt
 function verifyAdminPermission() {
-    if (isAdminAuthenticated) return true;
-
-    // 1. Tự động kiểm tra nếu mở từ Telegram WebApp
+    // 1. Kiểm tra xác thực Telegram ID khi dùng Mini App
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-    if (tgUser && tgUser.username && tgUser.username.toLowerCase() === ADMIN_SECURITY.telegramAdminUsername.toLowerCase()) {
-        isAdminAuthenticated = true;
-        return true;
+    if (tgUser && tgUser.id) {
+        if (ADMIN_SECURITY.telegramAdminIds.includes(Number(tgUser.id))) {
+            isAdminAuthenticated = true;
+            return true;
+        } else {
+            alert("❌ Tài khoản Telegram này không có quyền Admin!");
+            isAdminAuthenticated = false;
+            return false;
+        }
     }
 
-    // 2. Yêu cầu nhập Mật khẩu nếu mở trên Trình duyệt thường
+    // 2. Yêu cầu Mật khẩu nếu mở ở trình duyệt thường
     const userInput = prompt("🔒 Vui lòng nhập Mật khẩu Admin:");
     if (userInput !== null && userInput.trim() === ADMIN_SECURITY.password) {
         isAdminAuthenticated = true;
         return true;
     }
 
-    alert("❌ Truy cập bị từ chối! Bạn không có quyền Admin.");
+    alert("❌ Mật khẩu không chính xác!");
+    isAdminAuthenticated = false;
     return false;
 }
 
 function openAdminModal() {
+    // Luôn bắt buộc kiểm tra lại mỗi lần mở modal
     if (!verifyAdminPermission()) return;
 
     const select = document.getElementById("adminMethodSelect");
@@ -285,6 +291,8 @@ function openAdminModal() {
 }
 
 function closeAdminModal() {
+    // Reset phiên Admin ngay lập tức khi đóng Modal
+    isAdminAuthenticated = false; 
     const modal = document.getElementById("adminModal");
     if (modal) modal.style.display = "none";
 }

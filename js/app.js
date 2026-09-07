@@ -4,9 +4,9 @@ const ICON_BASE_URLS = {
 };
 
 const CRYPTOS = [
-    { code: "USDT", name: "USDT (TRC20/ERC20)", icon: ICON_BASE_URLS.crypto("usdt") },
-    { code: "BTC", name: "BTC (Bitcoin)", icon: ICON_BASE_URLS.crypto("btc") },
-    { code: "ETH", name: "ETH (Ethereum)", icon: ICON_BASE_URLS.crypto("eth") }
+    { code: "USDT", name: "USDT (TRC20/ERC20)", icon: ICON_BASE_URLS.crypto("usdt"), decimals: 2 },
+    { code: "BTC", name: "BTC (Bitcoin)", icon: ICON_BASE_URLS.crypto("btc"), decimals: 6 },
+    { code: "ETH", name: "ETH (Ethereum)", icon: ICON_BASE_URLS.crypto("eth"), decimals: 6 }
 ];
 
 const PAYMENTS = [
@@ -24,29 +24,30 @@ const PAYMENTS = [
 ];
 
 // 🔒 Cấu hình Admin & Bảo mật
+// ⚠️ LƯU Ý BẢO MẬT: Không nên để Password dạng plain text nếu ứng dụng chạy thực tế.
 const ADMIN_SECURITY = {
-    password: "Admin@123@", // ⚠️ Mật khẩu Admin khi mở trên trình duyệt web
-    telegramAdminIds: [5322206115]  // ⚠️ THAY BẰNG TELEGRAM ID SỐ CỦA BẠN
+    password: "Admin@123@", // Khuyên dùng xác thực Backend/Telegram ID
+    telegramAdminIds: [5322206115]
 };
 
-// Fallback cấu hình nếu chưa load file config ngoài
+// Fallback cấu hình hệ thống
 const SYSTEM_CONFIG = window.SYSTEM_CONFIG || { telegramAdmin: "exchangepay2477" };
 const FEE_CONFIG = window.FEE_CONFIG || { defaultFee: 2, fees: {} };
 const DEFAULT_PAYMENT_ACCOUNTS = window.PAYMENT_ACCOUNTS || {};
 
-let currentDirection = "C2P"; 
+let currentDirection = "C2P"; // C2P: Crypto -> Payment | P2C: Payment -> Crypto
 let marketPrices = { USDT: 1.0, BTC: 65000.0, ETH: 3500.0 };
 let lastEditedInput = "send";
 let isAdminAuthenticated = false;
 
-// ⚡ SỬA LỖI TẠI ĐÂY: Ưu tiên dữ liệu từ File Cấu Hình Gốc (DEFAULT_PAYMENT_ACCOUNTS)
+// ⚡ Lấy dữ liệu tài khoản (Ưu tiên File gốc -> LocalStorage)
 function loadAccountsData() {
     try {
         const savedLocal = localStorage.getItem("PAYMENT_ACCOUNTS_DATA");
         const localData = savedLocal ? JSON.parse(savedLocal) : {};
-        // Gộp dữ liệu: File gốc làm nền tảng, localData đè lên nếu có
         return { ...DEFAULT_PAYMENT_ACCOUNTS, ...localData };
     } catch (e) {
+        console.error("Lỗi đọc LocalStorage", e);
         return DEFAULT_PAYMENT_ACCOUNTS || {};
     }
 }
@@ -68,11 +69,9 @@ function bindEvents() {
 
     if (sendInput) {
         sendInput.addEventListener("input", onSendAmountChange);
-        sendInput.addEventListener("keyup", onSendAmountChange);
     }
     if (receiveInput) {
         receiveInput.addEventListener("input", onReceiveAmountChange);
-        receiveInput.addEventListener("keyup", onReceiveAmountChange);
     }
     if (sendSelect) sendSelect.addEventListener("change", onCurrencyChange);
     if (receiveSelect) receiveSelect.addEventListener("change", onCurrencyChange);
@@ -97,13 +96,13 @@ function initSelectOptions() {
     sendSelect.innerHTML = "";
     receiveSelect.innerHTML = "";
 
+    const modeBadge = document.getElementById("modeBadge");
+
     if (currentDirection === "C2P") {
-        const modeBadge = document.getElementById("modeBadge");
         if (modeBadge) modeBadge.innerText = "Chiều: Crypto ➔ Payment";
         CRYPTOS.forEach(c => sendSelect.add(new Option(c.name, c.code)));
         PAYMENTS.forEach(p => receiveSelect.add(new Option(p.name, p.code)));
     } else {
-        const modeBadge = document.getElementById("modeBadge");
         if (modeBadge) modeBadge.innerText = "Chiều: Payment ➔ Crypto";
         PAYMENTS.forEach(p => sendSelect.add(new Option(p.name, p.code)));
         CRYPTOS.forEach(c => receiveSelect.add(new Option(c.name, c.code)));
@@ -119,13 +118,15 @@ function toggleDirection() {
 async function fetchRealtimePrices() {
     try {
         const res = await fetch("https://api.coingecko.com/api/v3/simple/price?ids=tether,bitcoin,ethereum&vs_currencies=usd");
+        if (!res.ok) throw new Error("API Limit / Network Error");
         const data = await res.json();
+        
         marketPrices.USDT = data.tether ? data.tether.usd : 1.0;
         marketPrices.BTC = data.bitcoin ? data.bitcoin.usd : 65000.0;
         marketPrices.ETH = data.ethereum ? data.ethereum.usd : 3500.0;
         recalculate();
     } catch (err) {
-        console.warn("Dùng giá dự phòng", err);
+        console.warn("Dùng giá thị trường dự phòng:", err.message);
     }
 }
 
@@ -153,8 +154,11 @@ function recalculate() {
     const sendVal = sendSelect.value;
     const receiveVal = receiveSelect.value;
 
-    let cryptoCode = (currentDirection === "C2P") ? sendVal : receiveVal;
-    let paymentCode = (currentDirection === "C2P") ? receiveVal : sendVal;
+    const cryptoCode = (currentDirection === "C2P") ? sendVal : receiveVal;
+    const paymentCode = (currentDirection === "C2P") ? receiveVal : sendVal;
+
+    const cryptoObj = CRYPTOS.find(c => c.code === cryptoCode);
+    const cryptoDecimals = cryptoObj ? cryptoObj.decimals : 4;
 
     const cryptoSymbolElem = document.getElementById("cryptoSymbol");
     if (cryptoSymbolElem) cryptoSymbolElem.innerText = cryptoCode;
@@ -185,7 +189,7 @@ function recalculate() {
             receiveInput.value = sendAmt ? (sendAmt * effectiveRate).toFixed(2) : "";
         } else {
             const recvAmt = parseFloat(receiveInput.value) || 0;
-            sendInput.value = (recvAmt && effectiveRate > 0) ? (recvAmt / effectiveRate).toFixed(4) : "";
+            sendInput.value = (recvAmt && effectiveRate > 0) ? (recvAmt / effectiveRate).toFixed(cryptoDecimals) : "";
         }
     } else {
         const effectiveRateUSDPerCrypto = cryptoPriceUSD / (1 - feeRate);
@@ -195,7 +199,7 @@ function recalculate() {
 
         if (lastEditedInput === "send") {
             const sendAmt = parseFloat(sendInput.value) || 0;
-            receiveInput.value = sendAmt ? (sendAmt / effectiveRateUSDPerCrypto).toFixed(4) : "";
+            receiveInput.value = sendAmt ? (sendAmt / effectiveRateUSDPerCrypto).toFixed(cryptoDecimals) : "";
         } else {
             const recvAmt = parseFloat(receiveInput.value) || 0;
             sendInput.value = recvAmt ? (recvAmt * effectiveRateUSDPerCrypto).toFixed(2) : "";
@@ -226,7 +230,7 @@ function updateAccountDisplay(paymentCode) {
                 <div class="account-row">
                     <span>Số tài khoản/Email:</span> 
                     <strong id="accNo" class="highlight-text">${accInfo.accountNo || ''}</strong> 
-                    <button type="button" class="btn-copy" onclick="copyAccountNo()"><i class="fa-regular fa-copy"></i></button>
+                    <button type="button" class="btn-copy" onclick="copyAccountNo()"><i class="fa-regular fa-copy"></i> Sao chép</button>
                 </div>
                 <div class="account-row"><span>Chủ tài khoản:</span> <strong>${accInfo.accountHolder || ''}</strong></div>
                 <div class="account-note"><i class="fa-solid fa-circle-info"></i> ${accInfo.note || ''}</div>
@@ -253,15 +257,31 @@ function updateAccountDisplay(paymentCode) {
     }
 }
 
+// 📋 Sao chép với fallback cho trình duyệt không hỗ trợ Clipboard API
 function copyAccountNo() {
     const accNoElem = document.getElementById("accNo");
-    if (accNoElem) {
-        navigator.clipboard.writeText(accNoElem.innerText);
-        alert("Đã sao chép: " + accNoElem.innerText);
+    if (!accNoElem) return;
+
+    const textToCopy = accNoElem.innerText.trim();
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy).then(() => alert("Đã sao chép: " + textToCopy));
+    } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = textToCopy;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            alert("Đã sao chép: " + textToCopy);
+        } catch (err) {
+            alert("Không thể sao chép tự động, vui lòng chọn thủ công.");
+        }
+        document.body.removeChild(textArea);
     }
 }
 
-// 🔐 Kiểm tra quyền Admin nghiêm ngặt
+// 🔐 Kiểm tra quyền Admin
 function verifyAdminPermission() {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
     if (tgUser && tgUser.id) {
@@ -350,15 +370,16 @@ function deleteAccountManual() {
     }
 }
 
-// 📋 HÀM XUẤT CODE CẤU HÌNH: Dùng để dán vào file config gốc
 function copyConfigToClipboard() {
     const codeStr = `window.PAYMENT_ACCOUNTS = ${JSON.stringify(activeAccounts, null, 4)};`;
-    navigator.clipboard.writeText(codeStr).then(() => {
-        alert("📋 Đã copy code cấu hình vào Bộ nhớ tạm!\n\nHãy mở file config.js (hoặc file cấu hình gốc) và dán đè đoạn mã này vào.");
-    }).catch(err => {
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(codeStr).then(() => {
+            alert("📋 Đã copy code cấu hình vào Bộ nhớ tạm!\n\nHãy mở file config gốc và dán đè đọan mã này vào.");
+        });
+    } else {
         console.log(codeStr);
-        alert("Mở Console (F12) để copy đoạn code cấu hình.");
-    });
+        alert("Vui lòng mở Console (F12) để copy đoạn code cấu hình.");
+    }
 }
 
 function handleExchangeSubmit(event) {
@@ -368,7 +389,7 @@ function handleExchangeSubmit(event) {
     const recvAmt = document.getElementById("receiveAmount").value;
     const recvCurr = document.getElementById("receiveCurrency").value;
 
-    if (!sendAmt || sendAmt <= 0) {
+    if (!sendAmt || parseFloat(sendAmt) <= 0) {
         alert("Vui lòng nhập số tiền hợp lệ.");
         return;
     }
@@ -393,7 +414,7 @@ function handleExchangeSubmit(event) {
     window.open(`https://t.me/${SYSTEM_CONFIG.telegramAdmin}?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
-// Phím tắt bí mật để mở Admin Modal (Ctrl + Shift + A)
+// Phím tắt bí mật mở Admin Modal (Ctrl + Shift + A)
 document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.shiftKey && (e.key === "A" || e.key === "a")) {
         e.preventDefault();

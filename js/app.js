@@ -19,18 +19,18 @@ const PAYMENTS = [
     { code: "AUD_BANK", name: "AUD Bank (Australia)", icon: "https://img.icons8.com/color/48/bank.png" },
     { code: "KRW_BANK", name: "KRW Bank (Korea)", icon: "https://img.icons8.com/color/48/bank.png" },
     { code: "JPY_BANK", name: "JPY Bank (Japan)", icon: "https://img.icons8.com/color/48/bank.png" },
-    { code: "ALIPAY", name: "Alipay (支付宝)", icon: ICON_BASE_URLS.payment("alipay") },
-    { code: "WECHAT", name: "WeChat Pay (微信)", icon: ICON_BASE_URLS.payment("wechat") }
+    { code: "ALIPAY", name: "Alipay", icon: ICON_BASE_URLS.payment("alipay") },
+    { code: "WECHAT", name: "WeChat Pay", icon: ICON_BASE_URLS.payment("wechat") }
 ];
 
-// 🔒 Cấu hình Admin & Bảo mật
-// ⚠️ LƯU Ý BẢO MẬT: Không nên để Password dạng plain text nếu ứng dụng chạy thực tế.
+// 🔒 Admin Configuration & Security
+// ⚠️ SECURITY NOTE: Do not expose plain-text passwords in production code.
 const ADMIN_SECURITY = {
-    password: "Admin@123@", // Khuyên dùng xác thực Backend/Telegram ID
+    password: "Admin@123@", // Recommended: Use Backend/Telegram WebApp ID authentication
     telegramAdminIds: [5322206115]
 };
 
-// Fallback cấu hình hệ thống
+// Fallback System Configuration
 const SYSTEM_CONFIG = window.SYSTEM_CONFIG || { telegramAdmin: "exchangepay2477" };
 const FEE_CONFIG = window.FEE_CONFIG || { defaultFee: 2, fees: {} };
 const DEFAULT_PAYMENT_ACCOUNTS = window.PAYMENT_ACCOUNTS || {};
@@ -40,14 +40,14 @@ let marketPrices = { USDT: 1.0, BTC: 65000.0, ETH: 3500.0 };
 let lastEditedInput = "send";
 let isAdminAuthenticated = false;
 
-// ⚡ Lấy dữ liệu tài khoản (Ưu tiên File gốc -> LocalStorage)
+// ⚡ Load payment account data (Priority: Base Config -> LocalStorage)
 function loadAccountsData() {
     try {
         const savedLocal = localStorage.getItem("PAYMENT_ACCOUNTS_DATA");
         const localData = savedLocal ? JSON.parse(savedLocal) : {};
         return { ...DEFAULT_PAYMENT_ACCOUNTS, ...localData };
     } catch (e) {
-        console.error("Lỗi đọc LocalStorage", e);
+        console.error("Error loading LocalStorage:", e);
         return DEFAULT_PAYMENT_ACCOUNTS || {};
     }
 }
@@ -67,12 +67,8 @@ function bindEvents() {
     const sendSelect = document.getElementById("sendCurrency");
     const receiveSelect = document.getElementById("receiveCurrency");
 
-    if (sendInput) {
-        sendInput.addEventListener("input", onSendAmountChange);
-    }
-    if (receiveInput) {
-        receiveInput.addEventListener("input", onReceiveAmountChange);
-    }
+    if (sendInput) sendInput.addEventListener("input", onSendAmountChange);
+    if (receiveInput) receiveInput.addEventListener("input", onReceiveAmountChange);
     if (sendSelect) sendSelect.addEventListener("change", onCurrencyChange);
     if (receiveSelect) receiveSelect.addEventListener("change", onCurrencyChange);
 }
@@ -99,11 +95,11 @@ function initSelectOptions() {
     const modeBadge = document.getElementById("modeBadge");
 
     if (currentDirection === "C2P") {
-        if (modeBadge) modeBadge.innerText = "Chiều: Crypto ➔ Payment";
+        if (modeBadge) modeBadge.innerText = "Direction: Crypto ➔ Payment";
         CRYPTOS.forEach(c => sendSelect.add(new Option(c.name, c.code)));
         PAYMENTS.forEach(p => receiveSelect.add(new Option(p.name, p.code)));
     } else {
-        if (modeBadge) modeBadge.innerText = "Chiều: Payment ➔ Crypto";
+        if (modeBadge) modeBadge.innerText = "Direction: Payment ➔ Crypto";
         PAYMENTS.forEach(p => sendSelect.add(new Option(p.name, p.code)));
         CRYPTOS.forEach(c => receiveSelect.add(new Option(c.name, c.code)));
     }
@@ -126,7 +122,7 @@ async function fetchRealtimePrices() {
         marketPrices.ETH = data.ethereum ? data.ethereum.usd : 3500.0;
         recalculate();
     } catch (err) {
-        console.warn("Dùng giá thị trường dự phòng:", err.message);
+        console.warn("Using fallback market prices:", err.message);
     }
 }
 
@@ -224,32 +220,32 @@ function updateAccountDisplay(paymentCode) {
             accCard.innerHTML = `
                 <div class="account-title" style="display: flex; align-items: center; gap: 10px;">
                     <img src="${logoUrl}" alt="${paymentCode}" style="width: 22px; height: 22px; object-fit: contain; filter: drop-shadow(0 0 2px rgba(255,255,255,0.3));">
-                    <span>THÔNG TIN TÀI KHOẢN NHẬN TIỀN</span>
+                    <span>RECEIVING ACCOUNT DETAILS</span>
                 </div>
-                <div class="account-row"><span>Cổng/Ngân hàng:</span> <strong>${accInfo.bankName || ''}</strong></div>
+                <div class="account-row"><span>Method/Bank:</span> <strong>${accInfo.bankName || ''}</strong></div>
                 <div class="account-row">
-                    <span>Số tài khoản/Email:</span> 
+                    <span>Account No / Email:</span> 
                     <strong id="accNo" class="highlight-text">${accInfo.accountNo || ''}</strong> 
-                    <button type="button" class="btn-copy" onclick="copyAccountNo()"><i class="fa-regular fa-copy"></i> Sao chép</button>
+                    <button type="button" class="btn-copy" onclick="copyAccountNo()"><i class="fa-regular fa-copy"></i> Copy</button>
                 </div>
-                <div class="account-row"><span>Chủ tài khoản:</span> <strong>${accInfo.accountHolder || ''}</strong></div>
+                <div class="account-row"><span>Account Holder:</span> <strong>${accInfo.accountHolder || ''}</strong></div>
                 <div class="account-note"><i class="fa-solid fa-circle-info"></i> ${accInfo.note || ''}</div>
             `;
-            btnSubmit.innerHTML = `<i class="fa-brands fa-telegram"></i> ĐÃ CHUYỂN TIỀN - BÁO ADMIN`;
+            btnSubmit.innerHTML = `<i class="fa-brands fa-telegram"></i> PAYMENT SENT - NOTIFY ADMIN`;
         } else {
             accCard.innerHTML = `
                 <div class="account-title" style="color: #f59e0b; display: flex; align-items: center; gap: 10px;">
                     <img src="${logoUrl}" alt="${paymentCode}" style="width: 22px; height: 22px; object-fit: contain;">
-                    <span>YÊU CẦU LẤY TÀI KHOẢN THANH TOÁN</span>
+                    <span>PAYMENT ACCOUNT REQUEST</span>
                 </div>
                 <div style="font-size: 0.875rem; color: #94a3b8; line-height: 1.5; margin-top: 8px;">
-                    Phương thức <strong>${paymentCode}</strong> chưa có thông tin tự động. Vui lòng liên hệ Admin để nhận thông tin chuyển khoản!
+                    Automated details for <strong>${paymentCode}</strong> are currently unavailable. Please contact Admin to get transfer details!
                 </div>
                 <div class="account-note" style="color: #38bdf8; margin-top: 10px;">
-                    <i class="fa-brands fa-telegram"></i> Telegram hỗ trợ: @${SYSTEM_CONFIG.telegramAdmin}
+                    <i class="fa-brands fa-telegram"></i> Telegram Support: @${SYSTEM_CONFIG.telegramAdmin}
                 </div>
             `;
-            btnSubmit.innerHTML = `<i class="fa-brands fa-telegram"></i> LIÊN HỆ ADMIN LẤY TÀI KHOẢN`;
+            btnSubmit.innerHTML = `<i class="fa-brands fa-telegram"></i> CONTACT ADMIN FOR DETAILS`;
         }
     } else {
         accCard.style.display = "none";
@@ -257,7 +253,7 @@ function updateAccountDisplay(paymentCode) {
     }
 }
 
-// 📋 Sao chép với fallback cho trình duyệt không hỗ trợ Clipboard API
+// 📋 Copy to clipboard with fallback for unsupported browsers
 function copyAccountNo() {
     const accNoElem = document.getElementById("accNo");
     if (!accNoElem) return;
@@ -265,7 +261,7 @@ function copyAccountNo() {
     const textToCopy = accNoElem.innerText.trim();
 
     if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(textToCopy).then(() => alert("Đã sao chép: " + textToCopy));
+        navigator.clipboard.writeText(textToCopy).then(() => alert("Copied: " + textToCopy));
     } else {
         const textArea = document.createElement("textarea");
         textArea.value = textToCopy;
@@ -273,15 +269,15 @@ function copyAccountNo() {
         textArea.select();
         try {
             document.execCommand('copy');
-            alert("Đã sao chép: " + textToCopy);
+            alert("Copied: " + textToCopy);
         } catch (err) {
-            alert("Không thể sao chép tự động, vui lòng chọn thủ công.");
+            alert("Unable to copy automatically, please select manually.");
         }
         document.body.removeChild(textArea);
     }
 }
 
-// 🔐 Kiểm tra quyền Admin
+// 🔐 Verify Admin Permissions
 function verifyAdminPermission() {
     const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
     if (tgUser && tgUser.id) {
@@ -289,19 +285,19 @@ function verifyAdminPermission() {
             isAdminAuthenticated = true;
             return true;
         } else {
-            alert("❌ Tài khoản Telegram này không có quyền Admin!");
+            alert("❌ This Telegram account does not have Admin access!");
             isAdminAuthenticated = false;
             return false;
         }
     }
 
-    const userInput = prompt("🔒 Vui lòng nhập Mật khẩu Admin:");
+    const userInput = prompt("🔒 Please enter Admin Password:");
     if (userInput !== null && userInput.trim() === ADMIN_SECURITY.password) {
         isAdminAuthenticated = true;
         return true;
     }
 
-    alert("❌ Mật khẩu không chính xác!");
+    alert("❌ Incorrect password!");
     isAdminAuthenticated = false;
     return false;
 }
@@ -345,14 +341,14 @@ function saveAccountManual() {
     const note = document.getElementById("adminNote").value.trim();
 
     if (!accountNo) {
-        alert("Vui lòng nhập số tài khoản hoặc Email!");
+        alert("Please enter an Account Number or Email!");
         return;
     }
 
     activeAccounts[code] = { bankName, accountNo, accountHolder, note };
     localStorage.setItem("PAYMENT_ACCOUNTS_DATA", JSON.stringify(activeAccounts));
 
-    alert(`Đã cập nhật thành công tài khoản cho phương thức: ${code}`);
+    alert(`Successfully updated payment details for: ${code}`);
     closeAdminModal();
     recalculate();
 }
@@ -361,10 +357,10 @@ function deleteAccountManual() {
     if (!isAdminAuthenticated && !verifyAdminPermission()) return;
 
     const code = document.getElementById("adminMethodSelect").value;
-    if (confirm(`Bạn có chắc muốn xóa tài khoản của ${code}?`)) {
+    if (confirm(`Are you sure you want to delete account details for ${code}?`)) {
         delete activeAccounts[code];
         localStorage.setItem("PAYMENT_ACCOUNTS_DATA", JSON.stringify(activeAccounts));
-        alert(`Đã xóa tài khoản ${code}`);
+        alert(`Deleted account details for ${code}`);
         closeAdminModal();
         recalculate();
     }
@@ -374,11 +370,11 @@ function copyConfigToClipboard() {
     const codeStr = `window.PAYMENT_ACCOUNTS = ${JSON.stringify(activeAccounts, null, 4)};`;
     if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(codeStr).then(() => {
-            alert("📋 Đã copy code cấu hình vào Bộ nhớ tạm!\n\nHãy mở file config gốc và dán đè đọan mã này vào.");
+            alert("📋 Configuration code copied to clipboard!\n\nPaste this into your main configuration file.");
         });
     } else {
         console.log(codeStr);
-        alert("Vui lòng mở Console (F12) để copy đoạn code cấu hình.");
+        alert("Please open Browser Console (F12) to copy the configuration code.");
     }
 }
 
@@ -390,31 +386,31 @@ function handleExchangeSubmit(event) {
     const recvCurr = document.getElementById("receiveCurrency").value;
 
     if (!sendAmt || parseFloat(sendAmt) <= 0) {
-        alert("Vui lòng nhập số tiền hợp lệ.");
+        alert("Please enter a valid amount.");
         return;
     }
 
     let msg = "";
     if (currentDirection === "P2C" && activeAccounts[sendCurr] && activeAccounts[sendCurr].accountNo) {
-        msg = `Hi Admin, tôi đã chuyển tiền qua tài khoản trên Web:\n` +
+        msg = `Hi Admin, I have transferred funds via the account details on the website:\n` +
               `------------------------\n` +
-              `🔴 Số tiền gửi: ${sendAmt} ${sendCurr}\n` +
-              `🟢 Số tiền nhận: ${recvAmt} ${recvCurr}\n` +
+              `🔴 Amount Sent: ${sendAmt} ${sendCurr}\n` +
+              `🟢 Amount to Receive: ${recvAmt} ${recvCurr}\n` +
               `------------------------\n` +
-              `Nhờ Admin kiểm tra và chuyển ${recvCurr} giúp tôi!`;
+              `Please verify and release ${recvCurr} to me!`;
     } else {
-        msg = `Hi Admin, tôi cần quy đổi:\n` +
+        msg = `Hi Admin, I would like to initiate an exchange:\n` +
               `------------------------\n` +
-              `🔴 Gửi: ${sendAmt} ${sendCurr}\n` +
-              `🟢 Nhận: ${recvAmt} ${recvCurr}\n` +
+              `🔴 Send: ${sendAmt} ${sendCurr}\n` +
+              `🟢 Receive: ${recvAmt} ${recvCurr}\n` +
               `------------------------\n` +
-              `Vui lòng hỗ trợ tài khoản giao dịch!`;
+              `Please provide payment details to proceed!`;
     }
 
     window.open(`https://t.me/${SYSTEM_CONFIG.telegramAdmin}?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
-// Phím tắt bí mật mở Admin Modal (Ctrl + Shift + A)
+// Admin Modal Shortcut (Ctrl + Shift + A)
 document.addEventListener("keydown", (e) => {
     if (e.ctrlKey && e.shiftKey && (e.key === "A" || e.key === "a")) {
         e.preventDefault();
